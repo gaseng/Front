@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "297872002285",
+    "project_id": "gaseng",
+    "storage_bucket": "gaseng.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297872002285:android:432655bba4f8eb88b950e4",
+        "android_client_info": {
+          "package_name": "com.application.gaseng"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMPkslOe_wtqnc6H3hMyGhRhjmAhgs7FU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
