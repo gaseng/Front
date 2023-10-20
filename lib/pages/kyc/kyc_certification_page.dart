@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gaseng/constants/constant.dart';
 import 'package:gaseng/widgets/gaseng_bottom_button.dart';
 import 'package:gaseng/widgets/gaseng_general_button.dart';
+import 'package:get/get.dart';
 
 class KycCertificationPage extends StatelessWidget {
   const KycCertificationPage({Key? key}) : super(key: key);
@@ -67,7 +68,14 @@ class KycCertificationPage extends StatelessWidget {
               )
             ],
           ),
-          GasengBottomButton(text: '시작하기', color: primary, textColor: Colors.white,)
+          GestureDetector(
+            onTap: () => Get.toNamed("/kyc/card/info"),
+            child: GasengBottomButton(
+              text: '시작하기',
+              color: primary,
+              textColor: Colors.white,
+            ),
+          ),
         ],
       ),
     );
