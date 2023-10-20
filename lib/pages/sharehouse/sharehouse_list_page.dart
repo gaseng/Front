@@ -42,7 +42,7 @@ class SharehouseListPage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => Get.toNamed('sharehouse/add'),
         child: Icon(
           Icons.add,
           size: 30.0,
