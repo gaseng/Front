@@ -10,6 +10,7 @@ class GasengTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      maxLines: null,
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: TextStyle(color: gray08),
@@ -23,7 +24,7 @@ class GasengTextField extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(10.0)),
             borderSide: BorderSide(color: gray06)),
       ),
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: TextInputType.multiline,
     );
   }
 }
