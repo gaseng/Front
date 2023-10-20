@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../constants/constant.dart';
+import 'package:get/get.dart';
 
 class MySharehousePage extends StatelessWidget {
   const MySharehousePage({Key? key}) : super(key: key);
@@ -24,7 +25,6 @@ class MySharehousePage extends StatelessWidget {
           children: [
             SizedBox(height: 16.0),
             Container(
-              height: 120.h,
               margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -61,13 +61,25 @@ class MySharehousePage extends StatelessWidget {
                             children: [
                               Text('넓지만 아늑한 수내역', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
                               Spacer(),
-                              Icon(Icons.more_vert_sharp, color: gray08,),
+                              PopupMenuButton(
+                                onSelected: (String choice) {
+                                  if (choice == '수정') {
+                                    Get.toNamed('/sharehouse/edit');
+                                  }
+                                },
+                                  itemBuilder: (BuildContext ctx) {
+                                    return [
+                                      _menuItem(text: '수정'),
+                                      _menuItem(text: '삭제'),
+                                    ];
+                                  }
+                              ),
                             ],
                           ),
                           SizedBox(height: 8.0),
                           Text('경기도 성남시', style: TextStyle(fontSize: 12.0)),
                           SizedBox(height: 8.0),
-                          Text('일단 둘러보셔도 됩니다. 먼저 연락주신다음 찬찬히 둘러보세요.', style: TextStyle(fontSize: 12.0)),
+                          Text('일단 둘러보셔도 됩니다. 먼저 연락주신다음 찬찬히 둘러보세요.', style: TextStyle(fontSize: 12.0), maxLines: 2,),
                         ],
                       ),
                     ),
@@ -77,6 +89,19 @@ class MySharehousePage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _menuItem({required String text, Color color = Colors.black}) {
+    return PopupMenuItem<String>(
+      enabled: true,
+      onTap: () {},
+      value: text,
+      height: 40,
+      child: Text(
+        text,
+        style: TextStyle(color: color),
       ),
     );
   }
