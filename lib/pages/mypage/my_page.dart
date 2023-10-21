@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:gaseng/auth/SessionManager.dart';
+import 'package:gaseng/repositories/login_repository.dart';
 import 'package:get/get.dart';
 
 import '../../constants/constant.dart';
 
 class MyPage extends StatelessWidget {
-  const MyPage({Key? key}) : super(key: key);
+  LoginRepository loginRepository = LoginRepository();
+
+  logout () async {
+    String? memId = await SessionManager.getMemId();
+    if (memId != null) {
+      await loginRepository.logout(int.parse(memId));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +88,7 @@ class MyPage extends StatelessWidget {
               ),
             ),
             GestureDetector(
-              onTap: () => Get.toNamed('/login'),
+              onTap: logout,
               child: MyPageMenu(
                 textIcon: '🚪',
                 text: '로그아웃',
