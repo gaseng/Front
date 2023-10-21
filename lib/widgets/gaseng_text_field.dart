@@ -3,14 +3,26 @@ import 'package:flutter/material.dart';
 import '../constants/constant.dart';
 
 class GasengTextField extends StatelessWidget {
-  GasengTextField({required this.labelText});
+  GasengTextField({
+    required this.labelText,
+    this.controller,
+    this.validator,
+    this.keyboardType,
+    this.obscureText = false
+  });
 
   String labelText;
+  TextEditingController? controller;
+  String? Function(String?)? validator;
+  TextInputType? keyboardType;
+  bool obscureText;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      maxLines: null,
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      obscureText: obscureText,
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: TextStyle(color: gray08),
@@ -24,7 +36,7 @@ class GasengTextField extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(10.0)),
             borderSide: BorderSide(color: gray06)),
       ),
-      keyboardType: TextInputType.multiline,
+      keyboardType: keyboardType ?? TextInputType.none,
     );
   }
 }

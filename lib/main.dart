@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          initialRoute: '/admin',
+          initialRoute: '/login',
           getPages: [
             // general user
             GetPage(name: '/login', page: () => LoginPage()),
