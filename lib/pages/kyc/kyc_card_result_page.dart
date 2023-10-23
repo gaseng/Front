@@ -1,16 +1,64 @@
+import 'dart:io';
+
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gaseng/widgets/gaseng_bottom_button.dart';
 import 'package:gaseng/widgets/gaseng_general_button.dart';
 import 'package:get/get.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import '../../constants/constant.dart';
 
-class KycCardResultPage extends StatelessWidget {
-  const KycCardResultPage({Key? key}) : super(key: key);
+class KycCardResultPage extends StatefulWidget {
+  @override
+  State<KycCardResultPage> createState() => _KycCardResultPageState();
+}
+
+class _KycCardResultPageState extends State<KycCardResultPage> {
+  String scannedText = "";
+  bool confirm = false;
+  CroppedFile? imageFile;
+
+  void isDriverLicense(String text) {
+    print(text);
+    RegExp regex = RegExp(r'^\w{2}-\w{2}-\w{6}-\w{2}$');
+    if(regex.hasMatch(text)) {
+      confirm = true;
+    }
+  }
+
+  void getRecognizedText(CroppedFile image) async {
+    final InputImage inputImage = InputImage.fromFilePath(image.path);
+    final textRecognizer = GoogleMlKit.vision.textRecognizer(script: TextRecognitionScript.latin);
+    RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+
+    await textRecognizer.close();
+    scannedText = "";
+
+    for (TextBlock block in recognizedText.blocks) {
+      for (TextLine line in block.lines) {
+        scannedText = scannedText + line.text + "\n";
+        isDriverLicense(line.text);
+      }
+    }
+
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    if (Get.arguments != null) {
+      imageFile = Get.arguments as CroppedFile;
+      getRecognizedText(imageFile!);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -29,17 +77,18 @@ class KycCardResultPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 20.0),
-            Center(
-              child: Container(
-                width: 350.w,
-                height: 200.w,
-                decoration: BoxDecoration(
-                    color: gray08,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))
+            if (imageFile != null)
+              Center(
+                child: Image.file(
+                  File(imageFile!.path),
+                  width: 350.w,
+                  height: 200.w,
                 ),
               ),
-            ),
             SizedBox(height: 50.0),
+            Text("======TEST SCANNING======"),
+            Text(scannedText),
+            Text("========================="),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -65,11 +114,15 @@ class KycCardResultPage extends StatelessWidget {
               ],
             ),
             Spacer(),
+            if (!confirm)
+              Text('운전면허 아이디가 보이지 않습니다. 다시찍어주세요', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),),
+            if (!confirm)
+              SizedBox(height: 12.0),
             Row(
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => Get.toNamed('/kyc/card/info'),
+                    onTap: () => Get.back(),
                     child: GasengGeneralButton(
                       text: '다시하기',
                       color: gray10,
@@ -77,17 +130,19 @@ class KycCardResultPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 12.0),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => Get.toNamed('/kyc/face/info'),
-                    child: GasengGeneralButton(
-                      text: '다음',
-                      color: primary,
-                      textColor: Colors.white,
+                if (confirm)
+                  SizedBox(width: 12.0),
+                if (confirm)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Get.toNamed('/kyc/face/info'),
+                      child: GasengGeneralButton(
+                        text: '다음',
+                        color: primary,
+                        textColor: Colors.white,
+                      ),
                     ),
                   ),
-                ),
               ],
             )
           ],
