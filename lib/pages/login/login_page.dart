@@ -19,15 +19,16 @@ class _LoginPageState extends State<LoginPage> {
   LoginRepository repository = LoginRepository();
 
   login() async {
-    LoginRequest request = LoginRequest(
-      email: emailController.text,
-      password: passController.text,
-    );
-
-    int code = await repository.login(request);
-    if (code == 200) {
-      Get.offAllNamed('/main');
-    }
+    // LoginRequest request = LoginRequest(
+    //   email: emailController.text,
+    //   password: passController.text,
+    // );
+    //
+    // int code = await repository.login(request);
+    // if (code == 200) {
+    //   Get.offAllNamed('/main');
+    // }
+    Get.offAllNamed('/main');
   }
 
   @override
