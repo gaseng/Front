@@ -8,11 +8,11 @@ import '../models/login/login_request.dart';
 import '../models/login/sign_up_request.dart';
 
 class LoginRepository {
-  final String baseUrl = 'http://localhost:8080/member';
+  final String baseUrl = 'https://gaseng.site/member';
 
-  Future<int> signUp(SignUpRequest signUpRequest) async {
+  Future<int?> signUp(SignUpRequest signUpRequest) async {
     final Map<String, String> headers = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=UTF-8',
     };
 
     final String requestBody = json.encode(signUpRequest.toJson());
@@ -24,18 +24,22 @@ class LoginRepository {
         body: requestBody,
       );
 
-      return response.statusCode;
+      final decodeData = utf8.decode(response.bodyBytes);
+      dynamic responseJson = json.decode(decodeData);
+
+      return responseJson['data'];
     } catch (e) {
-      return 400;
+      return null;
     }
   }
 
-  Future<int> login(LoginRequest loginRequest) async {
+  Future<dynamic?> login(LoginRequest loginRequest) async {
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
     };
 
     final String requestBody = json.encode(loginRequest.toJson());
+    print("$baseUrl/login");
 
     try {
       final response = await http.post(
@@ -44,38 +48,45 @@ class LoginRepository {
         body: requestBody,
       );
 
-      dynamic responseJson = json.decode(response.body);
+      final decodeData = utf8.decode(response.bodyBytes);
+      dynamic responseJson = json.decode(decodeData);
 
       LoginResponse loginResponse =
           LoginResponse.fromJson(responseJson['data']);
 
       SessionManager.saveTokens(
         loginResponse.memId,
+        loginResponse.status,
         loginResponse.accessToken,
         loginResponse.refreshToken,
       );
 
-      return response.statusCode;
+      return loginResponse.role;
     } catch (e) {
-      return 400;
+      print(e);
+      return null;
     }
   }
 
-  Future<int> logout(int memId) async {
+  Future<int?> logout(int memId) async {
+    String? accessToken = await SessionManager.getAccessToken();
     final Map<String, String> headers = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $accessToken'
     };
 
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/logout"),
         headers: headers,
-        body: memId,
       );
+
+      print(response.statusCode);
+      print(response.body);
 
       return response.statusCode;
     } catch (e) {
-      return 400;
+      return null;
     }
   }
 }

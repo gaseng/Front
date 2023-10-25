@@ -6,12 +6,16 @@ part 'login_response.g.dart';
 class LoginResponse {
   final int memId;
   final String email;
+  final String role;
+  final String status;
   final String accessToken;
   final String refreshToken;
 
   LoginResponse({
     required this.memId,
     required this.email,
+    required this.role,
+    required this.status,
     required this.accessToken,
     required this.refreshToken,
   });

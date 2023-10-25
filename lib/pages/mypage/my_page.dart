@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gaseng/auth/SessionManager.dart';
 import 'package:gaseng/repositories/login_repository.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,38 @@ class MyPage extends StatelessWidget {
   logout () async {
     String? memId = await SessionManager.getMemId();
     if (memId != null) {
-      await loginRepository.logout(int.parse(memId));
+      int? code = await loginRepository.logout(int.parse(memId));
+      if (code != null && code == 200) {
+        Get.offAllNamed('/login');
+      }
+    }
+  }
+
+  checkMemberStatus() async {
+    String? status = await SessionManager.getStatus();
+
+    if (status == '노멀') {
+      Get.toNamed('/kyc');
+    } else if (status == '대기') {
+      Fluttertoast.showToast(
+        msg: 'KYC 신청하셨습니다. 승인까지 기다려주세요.',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        webBgColor: "linear-gradient(to right, #333333, #333333)",
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: 'KYC 거절된 이력이 있습니다.',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        webBgColor: "linear-gradient(to right, #ff3333, #ff3333)",
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -74,7 +106,7 @@ class MyPage extends StatelessWidget {
               ),
             ),
             GestureDetector(
-              onTap: () => Get.toNamed('/kyc'),
+              onTap: checkMemberStatus,
               child: MyPageMenu(
                 textIcon: '🪪',
                 text: 'KYC 인증하기',

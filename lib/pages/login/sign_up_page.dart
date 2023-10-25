@@ -36,9 +36,9 @@ class _SignUpPageState extends State<SignUpPage> {
         phone: phoneController.text,
       );
 
-      int code = await repository.signUp(request);
-      if (code == 200) {
-        Get.offAllNamed('/login');
+      int? memId = await repository.signUp(request);
+      if (memId != null) {
+        Get.offAllNamed('/login/checklist', arguments: memId);
       }
     }
   }
@@ -120,89 +120,91 @@ class _SignUpPageState extends State<SignUpPage> {
         elevation: 0.0,
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GasengTextField(
-                controller: emailController,
-                labelText: '이메일',
-                validator: _validateEmail,
-              ),
-              SizedBox(height: 12),
-              GasengTextField(
-                controller: passController,
-                labelText: '비밀번호',
-                obscureText: true,
-                validator: _validatePass,
-              ),
-              SizedBox(height: 12),
-              GasengTextField(
-                controller: passConfirmController,
-                labelText: '비밀번호 확인',
-                obscureText: true,
-                validator: _validatePassConfirm,
-              ),
-              SizedBox(height: 12),
-              GasengTextField(
-                controller: nameController,
-                labelText: '이름',
-                validator: _validateName,
-              ),
-              SizedBox(height: 12),
-              GasengTextField(
-                controller: nickController,
-                labelText: '닉네임',
-                validator: _validateNick,
-              ),
-              SizedBox(height: 12),
-              GasengTextField(
-                controller: phoneController,
-                labelText: '핸드폰',
-                validator: _validatePhone,
-              ),
-              SizedBox(height: 12),
-              Text(
-                '성별',
-                style: TextStyle(color: gray08),
-              ),
-              SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: toggle,
-                      child: GasengGeneralButton(
-                        text: '남',
-                        color: sex == 0 ? primary : Colors.white,
-                        textColor: sex == 0 ? Colors.white : Colors.black,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GasengTextField(
+                  controller: emailController,
+                  labelText: '이메일',
+                  validator: _validateEmail,
+                ),
+                SizedBox(height: 12),
+                GasengTextField(
+                  controller: passController,
+                  labelText: '비밀번호',
+                  obscureText: true,
+                  validator: _validatePass,
+                ),
+                SizedBox(height: 12),
+                GasengTextField(
+                  controller: passConfirmController,
+                  labelText: '비밀번호 확인',
+                  obscureText: true,
+                  validator: _validatePassConfirm,
+                ),
+                SizedBox(height: 12),
+                GasengTextField(
+                  controller: nameController,
+                  labelText: '이름',
+                  validator: _validateName,
+                ),
+                SizedBox(height: 12),
+                GasengTextField(
+                  controller: nickController,
+                  labelText: '닉네임',
+                  validator: _validateNick,
+                ),
+                SizedBox(height: 12),
+                GasengTextField(
+                  controller: phoneController,
+                  labelText: '핸드폰',
+                  validator: _validatePhone,
+                ),
+                SizedBox(height: 12),
+                Text(
+                  '성별',
+                  style: TextStyle(color: gray08),
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: toggle,
+                        child: GasengGeneralButton(
+                          text: '남',
+                          color: sex == 0 ? primary : Colors.white,
+                          textColor: sex == 0 ? Colors.white : Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.0),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: toggle,
-                      child: GasengGeneralButton(
-                        text: '여',
-                        color: sex == 1 ? primary : Colors.white,
-                        textColor: sex == 1 ? Colors.white : Colors.black,
+                    SizedBox(width: 12.0),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: toggle,
+                        child: GasengGeneralButton(
+                          text: '여',
+                          color: sex == 1 ? primary : Colors.white,
+                          textColor: sex == 1 ? Colors.white : Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.0),
-              GestureDetector(
-                onTap: _submitForm,
-                child: GasengGeneralButton(
-                    text: '등록', color: primary, textColor: Colors.white),
-              )
-            ],
+                  ],
+                ),
+                SizedBox(height: 30.0),
+                GestureDetector(
+                  onTap: _submitForm,
+                  child: GasengGeneralButton(
+                      text: '등록', color: primary, textColor: Colors.white),
+                )
+              ],
+            ),
           ),
         ),
       ),

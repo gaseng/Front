@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 // blue color
 Color get primary => const Color(0xFF1234A4);
@@ -73,3 +74,15 @@ List<BoxShadow> get cardShadow => [
         color: Colors.black.withOpacity(0.08),
       ),
     ];
+
+void kShowToast(String msg) {
+  Fluttertoast.showToast(
+    msg: msg,
+    toastLength: Toast.LENGTH_LONG,
+    gravity: ToastGravity.CENTER,
+    webBgColor: "linear-gradient(to right, #333333, #333333)",
+    timeInSecForIosWeb: 3,
+    backgroundColor: Colors.black54,
+    textColor: Colors.white,
+  );
+}

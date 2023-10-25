@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:gaseng/repositories/admin_repository.dart';
 
 import '../../constants/constant.dart';
 import 'package:get/get.dart';
 
-class AdminUserListPage extends StatelessWidget {
+import '../../models/user/member_list_summary.dart';
+
+class AdminUserListPage extends StatefulWidget {
   const AdminUserListPage({Key? key}) : super(key: key);
+
+  @override
+  State<AdminUserListPage> createState() => _AdminUserListPageState();
+}
+
+class _AdminUserListPageState extends State<AdminUserListPage> {
+  AdminRepository adminRepository = AdminRepository();
+  Future? future;
+  List<MemberListSummary> memberList = [];
+
+  @override
+  void initState() {
+    future = getMemberList();
+    super.initState();
+  }
+
+  getMemberList() async {
+    memberList = await adminRepository.getMemberList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +41,18 @@ class AdminUserListPage extends StatelessWidget {
         elevation: 0.0,
         centerTitle: true,
       ),
-      body: ListView(
-        children: [
-          GestureDetector(
-            onTap: () => Get.toNamed('/admin/user/detail'),
-            child: UserListTile(name: '김민수'),
-          ),
-          UserListTile(name: '이민경'),
-          UserListTile(name: '강감찬'),
-          UserListTile(name: '이소진'),
-        ],
+      body: FutureBuilder(
+        future: future,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return ListView(
+            children: memberList.map((member) {
+              return GestureDetector(
+                onTap: () => Get.toNamed('/admin/user/detail', arguments: member.memId),
+                child: UserListTile(name: member.memName),
+              );
+            }).toList(),
+          );
+        },
       ),
     );
   }
