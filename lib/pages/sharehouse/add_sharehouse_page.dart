@@ -32,18 +32,28 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
   TextEditingController desController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController addressDetailController = TextEditingController();
+  bool isLoading = false;
 
   late DaumPostModel _dataModel;
   List<XFile>? _imageFiles;
   XFile? _poster;
 
   uploadSharehouse() async {
+    setState(() {
+      isLoading = true;
+    });
     if (_formKey.currentState!.validate()) {
       if (_poster == null) {
         kShowToast('poster를 등록해주세요');
+        setState(() {
+          isLoading = false;
+        });
         return;
       } else if (_imageFiles == null) {
         kShowToast('image를 1개 이상 넣어주세요');
+        setState(() {
+          isLoading = false;
+        });
         return;
       }
       List<dynamic> lists = [];
@@ -66,6 +76,9 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
         kShowToast('업로드 되었습니다.');
         Get.offAllNamed('/main');
       }
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -178,127 +191,139 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '쉐어하우스 글 등록',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
-        ),
-        foregroundColor: Colors.black,
-        backgroundColor: Colors.white,
-        elevation: 0.0,
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    renderPoster(),
-                    SizedBox(height: 12.0),
-                    Text('쉐어하우스',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: gray10,
-                            fontSize: 12.0)),
-                    SizedBox(height: 8.0),
-                    GasengTextField(
-                      labelText: '제목',
-                      controller: titleController,
-                      validator: _validate,
-                    ),
-                    SizedBox(height: 12.0),
-                    GasengTextField(
-                      labelText: '내용',
-                      controller: desController,
-                      keyboardType: TextInputType.multiline,
-                      validator: _validate,
-                    ),
-                    SizedBox(height: 12.0),
-                    Row(
-                      children: [
-                        Spacer(),
-                        TextButton(
-                          onPressed: _pickImages,
-                          child: Text(
-                            '사진 첨부',
-                            style: TextStyle(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                    renderImages(),
-                    SizedBox(height: 30.0),
-                    Text('주소',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: gray10,
-                            fontSize: 12.0)),
-                    SizedBox(height: 8.0),
-                    GasengTextField(
-                      labelText: '주소',
-                      controller: addressController,
-                      validator: _validate,
-                    ),
-                    SizedBox(height: 12.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GasengTextField(
-                            labelText: '세부주소',
-                            controller: addressDetailController,
-                            validator: _validate,
-                          ),
-                        ),
-                        SizedBox(width: 12.0),
-                        GestureDetector(
-                          onTap: () async {
-                            Navigator.of(context)
-                                .push(MaterialPageRoute(builder: (context) {
-                              return DaumPostWebView();
-                            })).then((value) {
-                              if (value != null) {
-                                setState(() {
-                                  _dataModel = value;
-                                });
-                              }
-                            });
-                          },
-                          child: GasengGeneralButton(
-                            text: '우편번호 검색',
-                            color: primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 100.0),
-                  ],
-                ),
-              ),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Text(
+              '쉐어하우스 글 등록',
+              style: TextStyle(color: Colors.black, fontSize: 16.0),
             ),
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.white,
+            elevation: 0.0,
+            centerTitle: true,
           ),
-          Column(
+          body: Stack(
             children: [
-              Spacer(),
-              GestureDetector(
-                onTap: uploadSharehouse,
-                child: GasengBottomButton(
-                  text: '등록',
-                  color: primary,
+              SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        renderPoster(),
+                        SizedBox(height: 12.0),
+                        Text('쉐어하우스',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: gray10,
+                                fontSize: 12.0)),
+                        SizedBox(height: 8.0),
+                        GasengTextField(
+                          labelText: '제목',
+                          controller: titleController,
+                          validator: _validate,
+                        ),
+                        SizedBox(height: 12.0),
+                        GasengTextField(
+                          labelText: '내용',
+                          controller: desController,
+                          keyboardType: TextInputType.multiline,
+                          validator: _validate,
+                        ),
+                        SizedBox(height: 12.0),
+                        Row(
+                          children: [
+                            Spacer(),
+                            TextButton(
+                              onPressed: _pickImages,
+                              child: Text(
+                                '사진 첨부',
+                                style: TextStyle(
+                                    color: Colors.indigo,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        renderImages(),
+                        SizedBox(height: 30.0),
+                        Text('주소',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: gray10,
+                                fontSize: 12.0)),
+                        SizedBox(height: 8.0),
+                        GasengTextField(
+                          labelText: '주소',
+                          controller: addressController,
+                          validator: _validate,
+                        ),
+                        SizedBox(height: 12.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GasengTextField(
+                                labelText: '세부주소',
+                                controller: addressDetailController,
+                                validator: _validate,
+                              ),
+                            ),
+                            // SizedBox(width: 12.0),
+                            // GestureDetector(
+                            //   onTap: () async {
+                            //     Navigator.of(context)
+                            //         .push(MaterialPageRoute(builder: (context) {
+                            //       return DaumPostWebView();
+                            //     })).then((value) {
+                            //       if (value != null) {
+                            //         setState(() {
+                            //           _dataModel = value;
+                            //         });
+                            //       }
+                            //     });
+                            //   },
+                            //   child: GasengGeneralButton(
+                            //     text: '우편번호 검색',
+                            //     color: primary,
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                        SizedBox(height: 100.0),
+                      ],
+                    ),
+                  ),
                 ),
               ),
+              Column(
+                children: [
+                  Spacer(),
+                  GestureDetector(
+                    onTap: uploadSharehouse,
+                    child: GasengBottomButton(
+                      text: '등록',
+                      color: primary,
+                    ),
+                  ),
+                ],
+              )
             ],
-          )
-        ],
-      ),
+          ),
+        ),
+        isLoading
+            ? Container(
+          color: Colors.black.withOpacity(0.7),
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        )
+            : Container(), // 로딩바 표시
+      ],
     );
   }
 }

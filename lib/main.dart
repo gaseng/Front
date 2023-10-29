@@ -37,6 +37,7 @@ import 'package:gaseng/pages/login/login_page.dart';
 import 'package:gaseng/pages/login/sign_up_page.dart';
 import 'package:gaseng/pages/sharehouse/sharehouse_list_page.dart';
 import 'package:gaseng/pages/sharehouse/sharehouse_page.dart';
+import 'package:gaseng/pages/test_chat_page.dart';
 import 'package:get/get.dart';
 
 import 'firebase_options.dart';
@@ -64,7 +65,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          initialRoute: '/login',
+          initialRoute: '/kyc/face/info',
           getPages: [
             // general user
             GetPage(name: '/login', page: () => LoginPage()),
@@ -97,6 +98,7 @@ class MyApp extends StatelessWidget {
             GetPage(name: '/kyc/face-action/info', page: ()=> KycFaceActionInfoPage()),
             GetPage(name: '/kyc/face-action/film', page: ()=> KycFaceActionFilmPage()),
             GetPage(name: '/kyc/submit', page: ()=> KycSubmitPage()),
+            GetPage(name: '/test', page: ()=> TestChatPage()),
 
             // admin
             GetPage(name: '/admin', page: ()=> AdminMainTemplate()),

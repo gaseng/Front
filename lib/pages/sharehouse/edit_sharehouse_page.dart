@@ -147,25 +147,25 @@ class _EditSharehousePageState extends State<EditSharehousePage> {
                             validator: _validate,
                           ),
                         ),
-                        SizedBox(width: 12.0),
-                        GestureDetector(
-                          onTap: () async {
-                            Navigator.of(context)
-                                .push(MaterialPageRoute(builder: (context) {
-                              return DaumPostWebView();
-                            })).then((value) {
-                              if (value != null) {
-                                setState(() {
-                                  _dataModel = value;
-                                });
-                              }
-                            });
-                          },
-                          child: GasengGeneralButton(
-                            text: '우편번호 검색',
-                            color: primary,
-                          ),
-                        ),
+                        // SizedBox(width: 12.0),
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     Navigator.of(context)
+                        //         .push(MaterialPageRoute(builder: (context) {
+                        //       return DaumPostWebView();
+                        //     })).then((value) {
+                        //       if (value != null) {
+                        //         setState(() {
+                        //           _dataModel = value;
+                        //         });
+                        //       }
+                        //     });
+                        //   },
+                        //   child: GasengGeneralButton(
+                        //     text: '우편번호 검색',
+                        //     color: primary,
+                        //   ),
+                        // ),
                       ],
                     ),
                     SizedBox(height: 100.0),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gaseng/repositories/admin_repository.dart';
 
@@ -17,15 +19,47 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
   AdminRepository adminRepository = AdminRepository();
   Future? future;
   List<MemberListSummary> memberList = [];
+  final ScrollController _scrollController = ScrollController();
+  final double triggerThreshold = 100.0;
+  final Duration debounceDuration = Duration(milliseconds: 500);
+
+  bool isLoading = false;
+  Timer? _debounce;
 
   @override
   void initState() {
-    future = getMemberList();
+    future = getMemberList(null);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - triggerThreshold) {
+        _handleScrollEnd();
+      }
+    });
     super.initState();
   }
 
-  getMemberList() async {
-    memberList = await adminRepository.getMemberList();
+  getMemberList(int? index) async {
+    await adminRepository.getMemberList(index, memberList);
+    setState(() {
+
+    });
+  }
+
+  void _handleScrollEnd() {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(debounceDuration, () {
+      if (!isLoading) {
+        setState(() {
+          isLoading = true;
+        });
+        _loadMoreData();
+      }
+    });
+  }
+
+  void _loadMoreData() async {
+    print("load");
+    await getMemberList(memberList.last.memId);
   }
 
   @override
@@ -45,6 +79,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
         future: future,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return ListView(
+            controller: _scrollController,
             children: memberList.map((member) {
               return GestureDetector(
                 onTap: () => Get.toNamed('/admin/user/detail', arguments: member.memId),
@@ -63,6 +98,7 @@ class UserListTile extends StatelessWidget {
 
   final name;
 
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -71,7 +107,7 @@ class UserListTile extends StatelessWidget {
         Container(
           width: double.infinity,
           color: Colors.transparent,
-          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 40.0),
           child: Text(name, style: TextStyle(fontSize: 14.0)),
         ),
         Divider(),

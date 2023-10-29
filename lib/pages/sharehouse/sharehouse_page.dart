@@ -27,7 +27,7 @@ class _SharehousePageState extends State<SharehousePage> {
   }
 
   getSharehouse() async {
-    sharehouse = await sharehouseRepository.get(47);
+    sharehouse = await sharehouseRepository.get(53);
 
   }
 
