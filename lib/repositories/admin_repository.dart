@@ -9,15 +9,23 @@ import '../auth/SessionManager.dart';
 class AdminRepository {
   final String baseUrl = 'https://gaseng.site/member';
 
-  Future<List<MemberListSummary>> getMemberList() async {
+  Future<List<MemberListSummary>> getMemberList(int? index, List<MemberListSummary> responses) async {
     String? accessToken = await SessionManager.getAccessToken();
     final Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $accessToken'
     };
 
+    String url = "";
+
+    if (index != null) {
+      url = "$baseUrl?page=10&index=$index";
+    } else {
+      url = "$baseUrl?page=10";
+    }
+
     final response = await http.get(
-      Uri.parse("$baseUrl?page=10"),
+      Uri.parse(url),
       headers: headers,
     );
 
@@ -25,7 +33,6 @@ class AdminRepository {
     dynamic responseJson = json.decode(decodeData);
     List<dynamic> memberList = responseJson['data']['members'];
 
-    List<MemberListSummary> responses = [];
     for (dynamic member in memberList) {
       responses.add(MemberListSummary.fromJson(member));
     }

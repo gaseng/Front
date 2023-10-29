@@ -11,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import '../auth/SessionManager.dart';
 
 class SharehouseRepository {
-  final String baseUrl = 'https://gaseng.site/member';
+  final String baseUrl = 'https://gaseng.site/sharehouse';
 
   Future<List<SharehouseResponse>?> getAll() async {
     String? accessToken = await SessionManager.getAccessToken();

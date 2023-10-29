@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../models/login/checklist_request.dart';
 
 class ChecklistRepository {
-  final String baseUrl = 'https://gaseng.site/member';
+  final String baseUrl = 'https://gaseng.site/checklist';
 
   Future<ChecklistResponse?> get() async {
     String? accessToken = await SessionManager.getAccessToken();
@@ -36,12 +36,10 @@ class ChecklistRepository {
   }
 
   Future<int?> create(int id, ChecklistRequest request) async {
-    String? accessToken = await SessionManager.getAccessToken();
 
     try {
       final Map<String, String> headers = {
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $accessToken'
       };
 
       final response = await http.post(
