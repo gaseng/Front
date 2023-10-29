@@ -5,6 +5,7 @@ class SessionManager {
   static const _status = 'status';
   static const _accessTokenKey = 'accessToken';
   static const _refreshTokenKey = 'refreshToken';
+  static const _card = 'card';
 
   static Future<void> saveTokens(int memId, String status, String accessToken, String refreshToken) async {
     final prefs = await SharedPreferences.getInstance();
@@ -12,6 +13,11 @@ class SessionManager {
     await prefs.setString(_status, status);
     await prefs.setString(_accessTokenKey, accessToken);
     await prefs.setString(_refreshTokenKey, refreshToken);
+  }
+
+  static Future<void> saveCard(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_card, path);
   }
 
   static Future<String?> getMemId() async {

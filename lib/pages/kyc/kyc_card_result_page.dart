@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gaseng/auth/SessionManager.dart';
 import 'package:gaseng/widgets/gaseng_bottom_button.dart';
 import 'package:gaseng/widgets/gaseng_general_button.dart';
 import 'package:get/get.dart';
@@ -86,9 +87,6 @@ class _KycCardResultPageState extends State<KycCardResultPage> {
                 ),
               ),
             SizedBox(height: 50.0),
-            Text("======TEST SCANNING======"),
-            Text(scannedText),
-            Text("========================="),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -135,7 +133,10 @@ class _KycCardResultPageState extends State<KycCardResultPage> {
                 if (confirm)
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => Get.toNamed('/kyc/face/info'),
+                      onTap: () async {
+                        await SessionManager.saveCard(imageFile!.path);
+                        Get.toNamed('/kyc/face/info');
+                      },
                       child: GasengGeneralButton(
                         text: '다음',
                         color: primary,

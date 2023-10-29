@@ -154,7 +154,28 @@ class SharehouseCardSmall extends StatelessWidget {
                         if (choice == '수정') {
                           goMethod(id);
                         } else if (choice == '삭제') {
-                          deleteMethod(id);
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('정말 삭제하시겠습니까?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('취소'),
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text('확인'),
+                                  onPressed: () async {
+                                    await deleteMethod(id);
+                                    Get.back();
+                                  },
+                                ),
+                              ],
+                            );
+                          });
                         }
                       }, itemBuilder: (BuildContext ctx) {
                         return [
