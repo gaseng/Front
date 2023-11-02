@@ -13,7 +13,7 @@ class ChatListPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '채팅리스트',
+          '채팅 목록',
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
         foregroundColor: Colors.black,

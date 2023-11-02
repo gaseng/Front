@@ -1,7 +1,15 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gaseng/auth/SessionManager.dart';
 import 'package:gaseng/constants/constant.dart';
+import 'package:gaseng/models/chat/chat_room_response.dart';
+import 'package:gaseng/repositories/chat_repository.dart';
+import 'package:gaseng/widgets/gaseng_bottom_button.dart';
+import 'package:gaseng/widgets/processing.dart';
+import 'package:get/get.dart';
 
 import '../../models/sharehouse/sharehouse_response.dart';
 import '../../repositories/sharehouse_repository.dart';
@@ -15,20 +23,93 @@ class SharehousePage extends StatefulWidget {
 }
 
 class _SharehousePageState extends State<SharehousePage> {
+  final DatabaseReference chatReference = FirebaseDatabase.instanceFor(
+          app: Firebase.app(),
+          databaseURL:
+              "https://gaseng-default-rtdb.asia-southeast1.firebasedatabase.app")
+      .ref();
   SharehouseRepository sharehouseRepository = SharehouseRepository();
+  ChatRepository chatRepository = ChatRepository();
   SharehouseResponse? sharehouse;
   int currentIndex = 0;
+  late int id;
+  bool isAuthor = false;
+  bool isProcess = false;
   Future? future;
 
   @override
   void initState() {
-    future = getSharehouse();
+    id = Get.arguments;
+    future = getSharehouse(id);
     super.initState();
   }
 
-  getSharehouse() async {
-    sharehouse = await sharehouseRepository.get(53);
+  getSharehouse(int id) async {
+    sharehouse = await sharehouseRepository.get(id);
+    await brainAuthor();
+  }
 
+  matching() async {
+    setState(() {
+      isProcess = true;
+    });
+    bool state = await isReject();
+    if (state) {
+      dynamic response = await chatRepository.create(id);
+      if (response['data'] != null) {
+        ChatRoomResponse chatResponse = ChatRoomResponse.fromJson(response['data']);
+        chatReference.child("chat").child(chatResponse.chatRoomId.toString()).set({
+          'created_at': ServerValue.timestamp,
+        });
+        Get.toNamed('/chat/room');
+      } else {
+        kShowToast(response['message']);
+      }
+    }
+    setState(() {
+      isProcess = false;
+    });
+  }
+
+  brainAuthor() async {
+    String? loginMemId = await SessionManager.getMemId();
+    String memId = sharehouse!.memId.toString();
+    if (loginMemId == memId) {
+      setState(() {
+        isAuthor = true;
+      });
+    }
+  }
+
+  Future<bool> isReject() async {
+    String? status = await SessionManager.getStatus();
+    if (status == '거절') {
+      kShowToast("KYC가 거절된 회원은 매칭신청을 할 수 없습니다.");
+      return false;
+    } else if (status == '대기') {
+      kShowToast("KYC 요청이 아직 대기중입니다. 관리자가 승인할 때까지 기다려주세요.");
+      return false;
+    }
+    return true;
+  }
+
+  Widget renderButton() {
+    if (isAuthor) {
+      return const SizedBox();
+    } else {
+      return Column(
+        children: [
+          Spacer(),
+          GestureDetector(
+            onTap: matching,
+            child: GasengBottomButton(
+              text: '매칭 신청',
+              color: primary,
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   Widget buildIndicator(int currentIndex, int itemIndex) {
@@ -60,151 +141,157 @@ class _SharehousePageState extends State<SharehousePage> {
         future: future,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (sharehouse == null) {
-            return const Center(child: CircularProgressIndicator(),);
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  alignment: Alignment.bottomCenter,
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CarouselSlider(
-                        items: sharehouse!.images.map((imagePath) {
-                          return Container(
-                            height: 220.h,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: NetworkImage(imagePath)
-                                )
-                            ),
-                          );
-                        }).toList(),
-                        options: CarouselOptions(
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              currentIndex = index;
-                            });
-                          },
-                          initialPage: 0,
-                          enableInfiniteScroll: false,
-                          reverse: false,
-                          enlargeCenterPage: true,
-                          enlargeFactor: 0.3,
-                          scrollDirection: Axis.horizontal,
-                        )
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          sharehouse!.images.length,
+                    Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        CarouselSlider(
+                            items: sharehouse!.images.map((imagePath) {
+                              return Container(
+                                height: 220.h,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: NetworkImage(imagePath))),
+                              );
+                            }).toList(),
+                            options: CarouselOptions(
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  currentIndex = index;
+                                });
+                              },
+                              initialPage: 0,
+                              enableInfiniteScroll: false,
+                              reverse: false,
+                              enlargeCenterPage: true,
+                              enlargeFactor: 0.3,
+                              scrollDirection: Axis.horizontal,
+                            )),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              sharehouse!.images.length,
                               (index) => buildIndicator(index, currentIndex),
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                    SizedBox(height: 24.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            sharehouse!.title,
+                            style: TextStyle(
+                                fontSize: 24.0, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            sharehouse!.address,
+                            style: TextStyle(
+                                fontSize: 12.0, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            sharehouse!.description,
+                            style: TextStyle(fontSize: 12.0),
+                          ),
+                        ],
                       ),
                     ),
+                    const SizedBox(height: 32.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '입주자',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: gray12,
+                            ),
+                          ),
+                          SizedBox(height: 12.0),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 16.0,
+                                backgroundColor: gray06,
+                              ),
+                              SizedBox(width: 8.0),
+                              Text('백만송이 장미',
+                                  style: TextStyle(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ),
+                          SizedBox(height: 12.0),
+                          Wrap(
+                            children: [
+                              HashTag(text: '비흡연자'),
+                              HashTag(text: '코골이 약간'),
+                              HashTag(text: '자는 시간 : 11 AM'),
+                              HashTag(text: '소극적'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32.0),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '지도',
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: gray12),
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            "${sharehouse!.address} 부근",
+                            style: TextStyle(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
+                                color: gray12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8.0),
+                    Container(
+                      width: double.infinity,
+                      height: 200.h,
+                      color: gray04,
+                    )
                   ],
                 ),
-                SizedBox(height: 24.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        sharehouse!.title,
-                        style:
-                        TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4.0),
-                      Text(
-                        sharehouse!.address,
-                        style:
-                        TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(
-                        sharehouse!.description,
-                        style: TextStyle(fontSize: 12.0),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '입주자',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: gray12,
-                        ),
-                      ),
-                      SizedBox(height: 12.0),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 16.0,
-                            backgroundColor: gray06,
-                          ),
-                          SizedBox(width: 8.0),
-                          Text('백만송이 장미',
-                              style: TextStyle(
-                                  fontSize: 14.0, fontWeight: FontWeight.bold))
-                        ],
-                      ),
-                      SizedBox(height: 12.0),
-                      Wrap(
-                        children: [
-                          HashTag(text: '비흡연자'),
-                          HashTag(text: '코골이 약간'),
-                          HashTag(text: '자는 시간 : 11 AM'),
-                          HashTag(text: '소극적'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32.0),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '지도',
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: gray12),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(
-                        "${sharehouse!.address} 부근",
-                        style: TextStyle(
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.bold,
-                            color: gray12),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 8.0),
-                Container(
-                  width: double.infinity,
-                  height: 200.h,
-                  color: gray04,
-                )
-              ],
-            ),
+              ),
+              renderButton(),
+              Processing(isProcess: isProcess),
+            ],
           );
         },
       ),

@@ -11,7 +11,7 @@ class ChangePasswordResultPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '비밀번호 찾기',
+          '비밀번호 변경',
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
         foregroundColor: Colors.black,

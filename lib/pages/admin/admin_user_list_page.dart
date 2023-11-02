@@ -67,7 +67,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '사용자 조회',
+          '사용자 목록',
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
         foregroundColor: Colors.black,

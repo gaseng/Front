@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gaseng/auth/SessionManager.dart';
 import 'package:gaseng/constants/constant.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
@@ -89,6 +90,7 @@ class _KycCardFilmPageState extends State<KycCardFilmPage> {
       );
       if (croppedFile != null) {
         _croppedFile = croppedFile;
+        SessionManager.saveCard(_croppedFile!.path);
         Get.toNamed('kyc/card/result', arguments: _croppedFile);
       }
     }
@@ -97,83 +99,126 @@ class _KycCardFilmPageState extends State<KycCardFilmPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: gray12,
-      body: Stack(
-        children: [
-          FutureBuilder(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Stack(
-                  children: [
-                    CameraPreview(_controller),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Spacer(),
-                          Container(
-                            width: 330.w,
-                            height: 200.w,
-                            decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.2),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0))),
-                          ),
-                          SizedBox(height: 40.0),
-                          Text(
-                            '신분증 촬영하기',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 30.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            '운전면허증 사진의 앞부분을 촬영합니다.\n 프레임에 맞게 신분증을 놓아주세요.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () async {
-                              await takePicture();
-                              await _cropImage();
-                            },
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 41.0,
-                                  backgroundColor: gray10,
-                                ),
-                                CircleAvatar(
-                                  radius: 40.0,
-                                  backgroundColor: gray12,
-                                  child: Icon(
-                                    Icons.camera_alt_outlined,
-                                    size: 30.0,
-                                    color: gray10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 40.0),
-                        ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'KYC 인증',
+            style: TextStyle(color: Colors.black, fontSize: 16.0),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('여기서 종료하시겠습니까?'),
+                    content: Text('여기서 종료하시면 모든 과정을 처음부터 진행해야 합니다.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: Text('취소'),
                       ),
-                    )
-                  ],
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
+                      TextButton(
+                        onPressed: () {
+                          Get.offAllNamed('/main');
+                        },
+                        child: Text('확인'),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
-        ],
+          foregroundColor: Colors.black,
+          backgroundColor: Colors.white,
+          elevation: 0.0,
+          centerTitle: true,
+        ),
+        backgroundColor: gray12,
+        body: Stack(
+          children: [
+            FutureBuilder(
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Stack(
+                    children: [
+                      CameraPreview(_controller),
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Spacer(),
+                            Container(
+                              width: 330.w,
+                              height: 200.w,
+                              decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.2),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20.0))),
+                            ),
+                            SizedBox(height: 40.0),
+                            Text(
+                              '신분증 촬영하기',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 30.0,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              '운전면허증 사진의 앞부분을 촬영합니다.\n 프레임에 맞게 신분증을 놓아주세요.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Spacer(),
+                            GestureDetector(
+                              onTap: () async {
+                                await takePicture();
+                                await _cropImage();
+                              },
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 41.0,
+                                    backgroundColor: gray10,
+                                  ),
+                                  CircleAvatar(
+                                    radius: 40.0,
+                                    backgroundColor: gray12,
+                                    child: Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 30.0,
+                                      color: gray10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 40.0),
+                          ],
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

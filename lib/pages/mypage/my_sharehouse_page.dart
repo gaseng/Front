@@ -6,6 +6,7 @@ import 'package:gaseng/repositories/sharehouse_repository.dart';
 import '../../constants/constant.dart';
 import 'package:get/get.dart';
 
+import '../../models/sharehouse/sharehouse_list_response.dart';
 import '../../models/sharehouse/sharehouse_response.dart';
 
 class MySharehousePage extends StatefulWidget {
@@ -17,8 +18,9 @@ class MySharehousePage extends StatefulWidget {
 
 class _MySharehousePageState extends State<MySharehousePage> {
   SharehouseRepository sharehouseRepository = SharehouseRepository();
-  List<SharehouseResponse>? sharehouses;
+  List<SharehouseListResponse> sharehouses = [];
   Future? future;
+  int index = -1;
 
   @override
   void initState() {
@@ -27,17 +29,23 @@ class _MySharehousePageState extends State<MySharehousePage> {
   }
 
   getSharehouse() async {
-    sharehouses = await sharehouseRepository.getAll();
+    sharehouses = await sharehouseRepository.my();
+    setState(() {
+
+    });
   }
 
   goEdit(int id) {
-    Get.toNamed('/sharehouse/edit', arguments: id);
+    Get.toNamed('/sharehouse/edit', arguments: id)!.then((value) async {
+      sharehouses = await getSharehouse();
+    });
   }
 
   deleteSharehouse(int id) async {
-    await sharehouseRepository.delete(SharehouseDeleteRequest(id: id));
-    sharehouses = await sharehouseRepository.getAll();
-    setState(() {});
+    await sharehouseRepository.delete(SharehouseDeleteRequest(id: id)).then((value) async {
+      List<SharehouseListResponse>? list = [];
+      await getSharehouse();
+    });
   }
 
   @override
@@ -45,7 +53,7 @@ class _MySharehousePageState extends State<MySharehousePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '내가 쓴 글',
+          '내가 쓴 쉐어하우스 글',
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
         foregroundColor: Colors.black,
@@ -56,20 +64,20 @@ class _MySharehousePageState extends State<MySharehousePage> {
       body: FutureBuilder(
         future: future,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (sharehouses == null) {
+          if (sharehouses.isEmpty) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: Text('내가 쓴 글이 존재하지 않습니다.'),
             );
           } else {
             return SingleChildScrollView(
               child: Column(
-                children: sharehouses!.map((sharehouse) {
+                children: sharehouses.map((sharehouse) {
                   return SharehouseCardSmall(
-                    id: sharehouse.id,
-                    title: sharehouse.title,
-                    description: sharehouse.description,
-                    address: sharehouse.address,
-                    image: sharehouse.poster,
+                    id: sharehouse.shrId,
+                    title: sharehouse.shrTitle,
+                    description: sharehouse.shrDescription,
+                    address: sharehouse.shrAddress,
+                    image: sharehouse.shrPoster,
                     goMethod: goEdit,
                     deleteMethod: deleteSharehouse,
                   );
@@ -180,7 +188,7 @@ class SharehouseCardSmall extends StatelessWidget {
                       }, itemBuilder: (BuildContext ctx) {
                         return [
                           _menuItem(text: '수정'),
-                          _menuItem(text: '삭제'),
+                          _menuItem(text: '삭제', color: Colors.red),
                         ];
                       }),
                     ],

@@ -37,7 +37,7 @@ class FindAccountPage extends StatelessWidget {
             GestureDetector(
               onTap: () => Get.toNamed('/login/find-account/password'),
               child: GasengGeneralButton(
-                text: '비밀번호 찾기',
+                text: '비밀번호 변경 (비밀번호 찾기)',
                 color: primary,
                 textColor: Colors.white,
               ),

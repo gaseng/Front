@@ -27,13 +27,13 @@ class ChatRoomTile extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '눈물섞인 그녀',
+                      '######',
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 12.0),
                     ),
                     SizedBox(width: 8.0),
                     Text(
-                      '3분 전',
+                      '##',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 12.0,
@@ -42,7 +42,7 @@ class ChatRoomTile extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '어디 사세요?',
+                  '#######',
                   style: TextStyle(color: gray08, fontSize: 12.0),
                 ),
               ],

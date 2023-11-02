@@ -32,7 +32,7 @@ class _SharehouseListPageState extends State<SharehouseListPage> {
     return Scaffold(
       appBar: AppBar(
           title: Text(
-            '쉐어하우스',
+            '쉐어하우스 목록',
             style: TextStyle(color: Colors.black, fontSize: 16.0),
           ),
           foregroundColor: Colors.black,
@@ -62,10 +62,12 @@ class _SharehouseListPageState extends State<SharehouseListPage> {
                 },
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
-                    onTap: () => Get.toNamed('/sharehouse/detail'),
+                    onTap: () => Get.toNamed('/sharehouse/detail', arguments: sharehouses![index].id),
                     child: SharehouseCard(
                       title: sharehouses![index].title,
                       poster: sharehouses![index].poster,
+                      address: sharehouses![index].address,
+                      description: sharehouses![index].description,
                     ),
                   );
                 },

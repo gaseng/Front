@@ -23,7 +23,7 @@ class _AdminKycListPageState extends State<AdminKycListPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            'KYC 리스트 조회',
+            'KYC 목록 조회',
             style: TextStyle(color: Colors.black, fontSize: 16.0),
           ),
           actions: [

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:gaseng/constants/constant.dart';
 import 'package:get/get.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as imglib;
+
+import '../../widgets/processing.dart';
 
 class KycFaceActionFilmPage extends StatefulWidget {
   const KycFaceActionFilmPage({Key? key}) : super(key: key);
@@ -24,19 +27,23 @@ class _KycFaceActionFilmPageState extends State<KycFaceActionFilmPage> {
   bool isFace = false;
   late String info;
   late TextStyle infoStyle;
+  late int mode;
 
   @override
   void initState() {
-    info = "전면 카메라로 귀하의 얼굴을 촬영합니다.";
-    infoStyle = TextStyle(color: Colors.white);
+    setMode();
+    info = "전면 카메라로 귀하의 얼굴을 촬영합니다.\n";
+    setInfo();
+    initializeController();
+    super.initState();
+  }
+
+  initializeController() async {
     _initializeControllerFuture = availableCameras().then((value) {
       _controller = CameraController(value[1], ResolutionPreset.max,
           imageFormatGroup: ImageFormatGroup.bgra8888);
       _controller.initialize().then((_) {
-        _poseDetector = PoseDetector(
-          options: PoseDetectorOptions(),
-        );
-
+        poseDetectorInitialize();
         if (!mounted) {
           return;
         }
@@ -52,7 +59,12 @@ class _KycFaceActionFilmPageState extends State<KycFaceActionFilmPage> {
         }
       });
     });
-    super.initState();
+  }
+
+  poseDetectorInitialize() {
+    _poseDetector = PoseDetector(
+      options: PoseDetectorOptions(),
+    );
   }
 
   @override
@@ -60,6 +72,24 @@ class _KycFaceActionFilmPageState extends State<KycFaceActionFilmPage> {
     _controller.dispose();
     _poseDetector.close();
     super.dispose();
+  }
+
+  setMode() {
+    Random random = Random();
+    mode = random.nextInt(4);
+  }
+
+  setInfo() {
+    if (mode == 0) {
+      info += "고개를 좌측으로 숙여주세요.";
+    } else if (mode == 1){
+      info += "고개를 우측으로 숙여주세요.";
+    } else if (mode == 2) {
+      info += "얼굴과 왼손을 보여주세요.";
+    } else {
+      info += "얼굴과 오른손을 보여주세요.";
+    }
+    infoStyle = TextStyle(color: Colors.white);
   }
 
   Future<List<Pose>> processPicture(XFile picture) async {
@@ -78,56 +108,72 @@ class _KycFaceActionFilmPageState extends State<KycFaceActionFilmPage> {
       XFile picture = await _controller.takePicture();
       List<Pose> poses = await processPicture(picture);
 
-      if(poses.isEmpty) {
+      if (poses.isEmpty) {
         print("얼굴을 인식시켜주세요.");
       } else {
-        for (Pose pose in poses) {
-          pose.landmarks.forEach((_, landmark) {
-            final type = landmark.type;
-            final x = landmark.x;
-            final y = landmark.y;
-          });
+        bool success = false;
 
+        for (Pose pose in poses) {
           final leftEyeOuter = pose.landmarks[PoseLandmarkType.leftEyeOuter];
           final rightEyeOuter = pose.landmarks[PoseLandmarkType.rightEyeOuter];
+          final leftIndex = pose.landmarks[PoseLandmarkType.leftIndex];
+          final rightIndex = pose.landmarks[PoseLandmarkType.rightIndex];
 
-          print("left eye : ${leftEyeOuter!.y}");
-          print("right eye : ${rightEyeOuter!.y}");
+          print("mode : " + mode.toString());
+          print(leftEyeOuter!.likelihood);
+          print(rightEyeOuter!.likelihood);
+          print(leftIndex!.likelihood);
+          print(rightIndex!.likelihood);
 
-          if (leftEyeOuter!.y - 250 > rightEyeOuter!.y) {
-            print("고개를 왼쪽으로 기울이셨네요!");
-          } else if (leftEyeOuter!.y < rightEyeOuter!.y - 250) {
-            print("고개를 오른쪽으로 기울이셨네요!");
+          success = brainPicture(leftEyeOuter, rightEyeOuter, leftIndex, rightIndex);
+
+          if (success) {
+            setState(() {
+              isFace = true;
+              info = "얼굴이 인식되었습니다.";
+              infoStyle = TextStyle(color: Colors.white);
+            });
+            imageFile = picture;
           } else {
-            print("다시해주세요");
+            setState(() {
+              imageFile = picture;
+              info = "행동이 인식되지 않았기 때문에 재촬영합니다.\n";
+              setInfo();
+              infoStyle =
+                  TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
+            });
           }
         }
-
-        // if (faces.isNotEmpty) {
-        //   setState(() {
-        //     setState(() {
-        //       isFace = true;
-        //       info = "얼굴이 인식되었습니다.";
-        //       infoStyle = TextStyle(color: Colors.white);
-        //     });
-        //     imageFile = picture;
-        //   });
-        // } else {
-        //   setState(() {
-        //     imageFile = picture;
-        //     info = "얼굴이 인식되지 않았기 때문에 재촬영합니다.\n전면 카메라로 귀하의 얼굴을 촬영합니다.";
-        //     infoStyle = TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
-        //   });
-        // }
       }
     }
+  }
+
+  bool brainPicture(leftEyeOuter, rightEyeOuter, leftIndex, rightIndex) {
+    if (mode == 0) {
+      if (leftEyeOuter!.y - 250 > rightEyeOuter!.y) {
+        return true;
+      }
+    } else if (mode == 1) {
+      if (leftEyeOuter!.y < rightEyeOuter!.y - 250) {
+        return true;
+      }
+    } else if (mode == 2) {
+      if (leftIndex!.likelihood > 0.5 && leftEyeOuter!.likelihood > 0.7 && rightEyeOuter!.likelihood > 0.7) {
+        return true;
+      }
+    } else {
+      if (rightIndex!.likelihood > 0.5 && leftEyeOuter!.likelihood > 0.7 && rightEyeOuter!.likelihood > 0.7) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Widget bottomButton() {
     if (isFace) {
       return GestureDetector(
         onTap: () {
-          Get.toNamed('/kyc/face-action/info');
+          Get.toNamed('/kyc/submit');
         },
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
@@ -171,79 +217,100 @@ class _KycFaceActionFilmPageState extends State<KycFaceActionFilmPage> {
     }
   }
 
-  Widget processing() {
-    if (isProcess) {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.black45,
-        child: Center(
-          child: Text(
-            '처리중입니다.',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
-      );
-    } else {
-      return SizedBox();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Stack(
-                  children: [
-                    CameraPreview(_controller),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Spacer(),
-                          SizedBox(height: 40.0),
-                          Text(
-                            '특정 얼굴 촬영하기',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            info,
-                            textAlign: TextAlign.center,
-                            style: infoStyle,
-                          ),
-                          SizedBox(
-                            height: 150.h,
-                          ),
-                          bottomButton(),
-                          SizedBox(height: 40.0),
-                        ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'KYC 인증',
+            style: TextStyle(color: Colors.black, fontSize: 16.0),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('여기서 종료하시겠습니까?'),
+                    content: Text('여기서 종료하시면 모든 과정을 처음부터 진행해야 합니다.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: Text('취소'),
                       ),
-                    )
-                  ],
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
+                      TextButton(
+                        onPressed: () {
+                          Get.offAllNamed('/main');
+                        },
+                        child: Text('확인'),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
-          processing()
-        ],
+          foregroundColor: Colors.black,
+          backgroundColor: Colors.white,
+          elevation: 0.0,
+          centerTitle: true,
+        ),
+        body: Stack(
+          children: [
+            FutureBuilder(
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Stack(
+                    children: [
+                      CameraPreview(_controller),
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Spacer(),
+                            SizedBox(height: 40.0),
+                            Text(
+                              '특정 얼굴 촬영하기',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              info,
+                              textAlign: TextAlign.center,
+                              style: infoStyle,
+                            ),
+                            SizedBox(
+                              height: 150.h,
+                            ),
+                            bottomButton(),
+                            SizedBox(height: 40.0),
+                          ],
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+            Processing(isProcess: isProcess)
+          ],
+        ),
       ),
     );
   }

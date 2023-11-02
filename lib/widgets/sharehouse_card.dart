@@ -4,10 +4,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/constant.dart';
 
 class SharehouseCard extends StatelessWidget {
-  SharehouseCard({required this.title, required this.poster});
+  SharehouseCard({
+    required this.title,
+    required this.poster,
+    required this.address,
+    required this.description,
+  });
 
   final title;
   final poster;
+  final address;
+  final description;
 
   Widget renderImage() {
     if (poster == null) {
@@ -15,11 +22,8 @@ class SharehouseCard extends StatelessWidget {
     } else {
       return Container(
         height: 160.h,
-        decoration: BoxDecoration(
-            image: DecorationImage(
-                image: NetworkImage(poster)
-            )
-        ),
+        decoration:
+            BoxDecoration(image: DecorationImage(image: NetworkImage(poster))),
       );
     }
   }
@@ -36,6 +40,7 @@ class SharehouseCard extends StatelessWidget {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -47,12 +52,12 @@ class SharehouseCard extends StatelessWidget {
                 ),
                 SizedBox(width: 12.0),
                 Text(
-                  '눈물섞인 그녀',
+                  '####',
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 12.0),
                 Text(
-                  '3분전',
+                  '####. ##. ##',
                   style: TextStyle(fontSize: 12.0, color: gray08),
                 ),
               ],
@@ -71,12 +76,12 @@ class SharehouseCard extends StatelessWidget {
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  '경기도 성남시',
+                  address,
                   style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  '소음이 없는 곳이 장점입니다. 다른 사람들의 쉐어하우스와는 다르게 커피머신을 제공하여 마음껏 커피를 드셔도 되는 공간입니다. 소음이 없기 때문에 걷거나 돌아다니실 때 조용히 해주셔야 합니다.',
+                  description,
                   style: TextStyle(fontSize: 12.0),
                 ),
               ],

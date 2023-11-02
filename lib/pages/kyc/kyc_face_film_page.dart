@@ -8,6 +8,9 @@ import 'package:get/get.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as imglib;
 
+import '../../auth/SessionManager.dart';
+import '../../widgets/processing.dart';
+
 class KycFaceFilmPage extends StatefulWidget {
   const KycFaceFilmPage({Key? key}) : super(key: key);
 
@@ -29,17 +32,23 @@ class _KycFaceFilmPageState extends State<KycFaceFilmPage> {
   void initState() {
     info = "전면 카메라로 귀하의 얼굴을 촬영합니다.";
     infoStyle = TextStyle(color: Colors.white);
+    initializeController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _faceDetector.close();
+    super.dispose();
+  }
+
+  initializeController() async {
     _initializeControllerFuture = availableCameras().then((value) {
       _controller = CameraController(value[1], ResolutionPreset.max,
           imageFormatGroup: ImageFormatGroup.bgra8888);
       _controller.initialize().then((_) {
-        _faceDetector = FaceDetector(
-          options: FaceDetectorOptions(
-            enableContours: true,
-            enableLandmarks: true,
-          ),
-        );
-
+        faceDetectorInitialize();
         if (!mounted) {
           return;
         }
@@ -55,14 +64,15 @@ class _KycFaceFilmPageState extends State<KycFaceFilmPage> {
         }
       });
     });
-    super.initState();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _faceDetector.close();
-    super.dispose();
+  faceDetectorInitialize() {
+    _faceDetector = FaceDetector(
+      options: FaceDetectorOptions(
+        enableContours: true,
+        enableLandmarks: true,
+      ),
+    );
   }
 
   Future<List<Face>> processPicture(XFile picture) async {
@@ -81,7 +91,7 @@ class _KycFaceFilmPageState extends State<KycFaceFilmPage> {
       XFile picture = await _controller.takePicture();
       List<Face> faces = await processPicture(picture);
 
-      if (faces.isNotEmpty) {
+      if (faces.length == 1) {
         setState(() {
           isFace = true;
           info = "얼굴이 인식되었습니다.";
@@ -102,6 +112,7 @@ class _KycFaceFilmPageState extends State<KycFaceFilmPage> {
     if (isFace) {
       return GestureDetector(
         onTap: () {
+          SessionManager.saveFace(imageFile!.path);
           Get.toNamed('/kyc/face-action/info');
         },
         child: Container(
@@ -146,79 +157,100 @@ class _KycFaceFilmPageState extends State<KycFaceFilmPage> {
     }
   }
 
-  Widget processing() {
-    if (isProcess) {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.black45,
-        child: Center(
-          child: Text(
-            '처리중입니다.',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
-      );
-    } else {
-      return SizedBox();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Stack(
-                  children: [
-                    CameraPreview(_controller),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Spacer(),
-                          SizedBox(height: 40.0),
-                          Text(
-                            '얼굴 촬영하기',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            info,
-                            textAlign: TextAlign.center,
-                            style: infoStyle,
-                          ),
-                          SizedBox(
-                            height: 150.h,
-                          ),
-                          bottomButton(),
-                          SizedBox(height: 40.0),
-                        ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'KYC 인증',
+            style: TextStyle(color: Colors.black, fontSize: 16.0),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('여기서 종료하시겠습니까?'),
+                    content: Text('여기서 종료하시면 모든 과정을 처음부터 진행해야 합니다.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: Text('취소'),
                       ),
-                    )
-                  ],
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
+                      TextButton(
+                        onPressed: () {
+                          Get.offAllNamed('/main');
+                        },
+                        child: Text('확인'),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
-          processing()
-        ],
+          foregroundColor: Colors.black,
+          backgroundColor: Colors.white,
+          elevation: 0.0,
+          centerTitle: true,
+        ),
+        body: Stack(
+          children: [
+            FutureBuilder(
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Stack(
+                    children: [
+                      CameraPreview(_controller),
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Spacer(),
+                            SizedBox(height: 40.0),
+                            Text(
+                              '얼굴 촬영하기',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              info,
+                              textAlign: TextAlign.center,
+                              style: infoStyle,
+                            ),
+                            SizedBox(
+                              height: 150.h,
+                            ),
+                            bottomButton(),
+                            SizedBox(height: 40.0),
+                          ],
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+            Processing(isProcess: isProcess)
+          ],
+        ),
       ),
     );
   }

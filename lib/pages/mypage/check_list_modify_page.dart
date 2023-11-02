@@ -120,7 +120,7 @@ class _CheckListModifyPageState extends State<CheckListModifyPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '체크리스트 작성',
+          '체크리스트 수정',
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
         foregroundColor: Colors.black,

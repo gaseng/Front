@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gaseng/widgets/processing.dart';
 import 'package:http/http.dart' as http;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -32,7 +33,7 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
   TextEditingController desController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController addressDetailController = TextEditingController();
-  bool isLoading = false;
+  bool isProcess = false;
 
   late DaumPostModel _dataModel;
   List<XFile>? _imageFiles;
@@ -40,19 +41,19 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
 
   uploadSharehouse() async {
     setState(() {
-      isLoading = true;
+      isProcess = true;
     });
     if (_formKey.currentState!.validate()) {
       if (_poster == null) {
         kShowToast('poster를 등록해주세요');
         setState(() {
-          isLoading = false;
+          isProcess = false;
         });
         return;
       } else if (_imageFiles == null) {
         kShowToast('image를 1개 이상 넣어주세요');
         setState(() {
-          isLoading = false;
+          isProcess = false;
         });
         return;
       }
@@ -76,10 +77,11 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
         kShowToast('업로드 되었습니다.');
         Get.offAllNamed('/main');
       }
-      setState(() {
-        isLoading = false;
-      });
     }
+
+    setState(() {
+      isProcess = false;
+    });
   }
 
   String? _validate(String? value) {
@@ -106,9 +108,13 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
     final pickedImages = await picker.pickMultiImage(imageQuality: 10);
 
     if (pickedImages != null) {
-      setState(() {
-        _imageFiles = pickedImages;
-      });
+      if (pickedImages.length > 5) {
+        kShowToast('이미지가 5장을 넘어서는 안 됩니다.');
+      } else {
+        setState(() {
+          _imageFiles = pickedImages;
+        });
+      }
     }
   }
 
@@ -315,14 +321,7 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
             ],
           ),
         ),
-        isLoading
-            ? Container(
-          color: Colors.black.withOpacity(0.7),
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        )
-            : Container(), // 로딩바 표시
+        Processing(isProcess: isProcess),
       ],
     );
   }

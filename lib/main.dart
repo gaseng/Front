@@ -22,6 +22,7 @@ import 'package:gaseng/pages/mypage/check_list_modify_page.dart';
 import 'package:gaseng/pages/mypage/my_page.dart';
 import 'package:gaseng/pages/mypage/my_sharehouse_page.dart';
 import 'package:gaseng/pages/mypage/scrap_sharehouse_page.dart';
+import 'package:gaseng/pages/mypage/withdraw_page.dart';
 import 'package:gaseng/pages/sharehouse/add_sharehouse_page.dart';
 import 'package:gaseng/pages/sharehouse/edit_sharehouse_page.dart';
 import 'package:gaseng/pages/sharehouse/notification_page.dart';
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          initialRoute: '/kyc/face/info',
+          initialRoute: '/login',
           getPages: [
             // general user
             GetPage(name: '/login', page: () => LoginPage()),
@@ -87,6 +88,7 @@ class MyApp extends StatelessWidget {
             GetPage(name: '/mypage/sharehouse', page: ()=> MySharehousePage()),
             GetPage(name: '/mypage/scrap', page: ()=> ScrapSharehousePage()),
             GetPage(name: '/mypage/checklist', page: ()=> CheckListModifyPage()),
+            GetPage(name: '/mypage/withdraw', page: ()=> WithdrawPage()),
             GetPage(name: '/chat', page: ()=> ChatListPage()),
             GetPage(name: '/chat/room', page: ()=> ChatRoomPage()),
             GetPage(name: '/kyc', page: ()=> KycCertificationPage()),

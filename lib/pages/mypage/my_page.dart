@@ -19,6 +19,10 @@ class MyPage extends StatelessWidget {
     }
   }
 
+  withdraw () {
+    Get.toNamed('/mypage/withdraw');
+  }
+
   checkMemberStatus() async {
     String? status = await SessionManager.getStatus();
 
@@ -96,7 +100,7 @@ class MyPage extends StatelessWidget {
             SizedBox(height: 24.0),
             GestureDetector(
               onTap: () => Get.toNamed('/mypage/sharehouse'),
-              child: MyPageMenu(textIcon: '📝', text: '내가 쓴 글 조회'),
+              child: MyPageMenu(textIcon: '📝', text: '내가 쓴 쉐어하우스 글 조회'),
             ),
             GestureDetector(
               onTap: () => Get.toNamed('/mypage/scrap'),
@@ -124,6 +128,13 @@ class MyPage extends StatelessWidget {
               child: MyPageMenu(
                 textIcon: '🚪',
                 text: '로그아웃',
+              ),
+            ),
+            GestureDetector(
+              onTap: withdraw,
+              child: MyPageMenu(
+                textIcon: '❌',
+                text: '회원 탈퇴',
                 isDivided: false,
               ),
             ),
