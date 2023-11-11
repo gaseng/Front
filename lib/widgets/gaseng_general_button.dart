@@ -11,7 +11,7 @@ class GasengGeneralButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.all(

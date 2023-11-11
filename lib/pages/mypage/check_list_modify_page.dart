@@ -74,7 +74,6 @@ class _CheckListModifyPageState extends State<CheckListModifyPage> {
   }
 
   toggleCigarette(int mode) {
-    print(initialTime);
     setState(() {
       cigarette = mode;
     });
@@ -152,24 +151,24 @@ class _CheckListModifyPageState extends State<CheckListModifyPage> {
                         children: [
                           Expanded(
                             child: GestureDetector(
-                              onTap: () => toggleCigarette(0),
+                              onTap: () => toggleCigarette(1),
                               child: GasengGeneralButton(
                                 text: '비흡연자',
-                                color: cigarette == 0 ? primary : Colors.white,
+                                color: cigarette == 1 ? primary : Colors.white,
                                 textColor:
-                                cigarette == 0 ? Colors.white : Colors.black,
+                                cigarette == 1 ? Colors.white : Colors.black,
                               ),
                             ),
                           ),
                           SizedBox(width: 12.0),
                           Expanded(
                             child: GestureDetector(
-                              onTap: () => toggleCigarette(1),
+                              onTap: () => toggleCigarette(0),
                               child: GasengGeneralButton(
                                 text: '흡연자',
-                                color: cigarette == 1 ? primary : Colors.white,
+                                color: cigarette == 0 ? primary : Colors.white,
                                 textColor:
-                                cigarette == 1 ? Colors.white : Colors.black,
+                                cigarette == 0 ? Colors.white : Colors.black,
                               ),
                             ),
                           ),

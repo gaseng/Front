@@ -7,6 +7,7 @@ import 'package:gaseng/constants/constant.dart';
 import 'package:get/get.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as imglib;
+import 'package:http/http.dart' as http;
 
 import '../../auth/SessionManager.dart';
 import '../../widgets/processing.dart';
@@ -111,8 +112,9 @@ class _KycFaceFilmPageState extends State<KycFaceFilmPage> {
   Widget bottomButton() {
     if (isFace) {
       return GestureDetector(
-        onTap: () {
-          SessionManager.saveFace(imageFile!.path);
+        onTap: () async {
+          http.MultipartFile faceFile = await http.MultipartFile.fromPath('face', imageFile!.path);
+          SessionManager.face = faceFile;
           Get.toNamed('/kyc/face-action/info');
         },
         child: Container(

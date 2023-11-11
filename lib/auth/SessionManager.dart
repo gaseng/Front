@@ -1,34 +1,47 @@
+import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class SessionManager {
   static const _memId = 'memId';
+  static const _memName = 'memName';
+  static const _nickname = 'nickname';
+  static const _email = 'email';
   static const _status = 'status';
   static const _accessTokenKey = 'accessToken';
   static const _refreshTokenKey = 'refreshToken';
-  static const _card = 'card';
-  static const _face = 'face';
+  static http.MultipartFile? card;
+  static http.MultipartFile? face;
 
-  static Future<void> saveTokens(int memId, String status, String accessToken, String refreshToken) async {
+  static Future<void> saveTokens(int memId, String nickname, String email, String status, String accessToken, String refreshToken) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_memId, memId.toString());
+    await prefs.setString(_nickname, nickname);
+    await prefs.setString(_email, email);
     await prefs.setString(_status, status);
     await prefs.setString(_accessTokenKey, accessToken);
     await prefs.setString(_refreshTokenKey, refreshToken);
   }
 
-  static Future<void> saveCard(String path) async {
+  static Future<void> toWait() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_card, path);
-  }
-
-  static Future<void> saveFace(String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_face, path);
+    await prefs.remove(_status);
+    await prefs.setString(_status, "대기");
   }
 
   static Future<String?> getMemId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_memId);
+  }
+
+  static Future<String?> getNickname() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_nickname);
+  }
+
+  static Future<String?> getEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_email);
   }
 
   static Future<String?> getStatus() async {

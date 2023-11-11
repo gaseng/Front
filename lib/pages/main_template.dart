@@ -17,11 +17,37 @@ class _MainTemplateState extends State<MainTemplate>
 
   int _focusedIndex = 0;
 
+  Widget? _currentPage;
+
   @override
   void initState() {
     tabController =
         TabController(length: 4, vsync: this, animationDuration: Duration.zero);
+    tabController.addListener(() {
+      setState(() {
+        _focusedIndex = tabController.index;
+        _currentPage = _buildPage(_focusedIndex);
+      });
+    });
+    _currentPage = _buildPage(_focusedIndex);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildPage(int index) {
+    if (index == 0) {
+      return SharehouseListPage();
+    } else if (index == 1) {
+      return ChatListPage();
+    } else if (index == 2) {
+      return MyPage();
+    }
+    throw Exception("Unhandled tab index: $index");
   }
 
   void indexListener(int index) {
@@ -34,14 +60,7 @@ class _MainTemplateState extends State<MainTemplate>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _focusedIndex,
-        children: [
-          SharehouseListPage(),
-          ChatListPage(),
-          MyPage(),
-        ],
-      ),
+      body: _currentPage,
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
@@ -56,6 +75,7 @@ class _MainTemplateState extends State<MainTemplate>
         onTap: (int index) {
           setState(() {
             _focusedIndex = index;
+            _currentPage = _buildPage(_focusedIndex);
           });
         },
         selectedFontSize: 12.0,

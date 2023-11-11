@@ -5,6 +5,7 @@ import 'package:gaseng/constants/constant.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:http/http.dart' as http;
 
 class KycCardFilmPage extends StatefulWidget {
   const KycCardFilmPage({Key? key}) : super(key: key);
@@ -90,7 +91,8 @@ class _KycCardFilmPageState extends State<KycCardFilmPage> {
       );
       if (croppedFile != null) {
         _croppedFile = croppedFile;
-        SessionManager.saveCard(_croppedFile!.path);
+        http.MultipartFile cardFile = await http.MultipartFile.fromPath('card', _croppedFile!.path);
+        SessionManager.card = cardFile;
         Get.toNamed('kyc/card/result', arguments: _croppedFile);
       }
     }

@@ -5,6 +5,8 @@ part 'login_response.g.dart';
 @JsonSerializable()
 class LoginResponse {
   final int memId;
+  final String memName;
+  final String nickname;
   final String email;
   final String role;
   final String status;
@@ -13,6 +15,8 @@ class LoginResponse {
 
   LoginResponse({
     required this.memId,
+    required this.memName,
+    required this.nickname,
     required this.email,
     required this.role,
     required this.status,

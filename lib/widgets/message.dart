@@ -3,12 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../constants/constant.dart';
 
-class Chat extends StatelessWidget {
-  Chat({required this.isMe, required this.nick, required this.message});
+class Message extends StatelessWidget {
+  Message({required this.isMe, required this.nick, required this.message, required this.timestamp});
 
   final bool isMe;
   final String nick;
   final String message;
+  final int timestamp;
 
   @override
   Widget build(BuildContext context) {

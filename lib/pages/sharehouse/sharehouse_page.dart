@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -5,11 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gaseng/auth/SessionManager.dart';
 import 'package:gaseng/constants/constant.dart';
-import 'package:gaseng/models/chat/chat_room_response.dart';
+import 'package:gaseng/models/chat/chat_room_create_response.dart';
+import 'package:gaseng/enum/checklist_enum.dart';
+import 'package:gaseng/models/sharehouse/sharehouse_detail_response.dart';
 import 'package:gaseng/repositories/chat_repository.dart';
 import 'package:gaseng/widgets/gaseng_bottom_button.dart';
 import 'package:gaseng/widgets/processing.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../models/sharehouse/sharehouse_response.dart';
 import '../../repositories/sharehouse_repository.dart';
@@ -29,13 +35,20 @@ class _SharehousePageState extends State<SharehousePage> {
               "https://gaseng-default-rtdb.asia-southeast1.firebasedatabase.app")
       .ref();
   SharehouseRepository sharehouseRepository = SharehouseRepository();
+  final ScrollController _scrollController = ScrollController();
   ChatRepository chatRepository = ChatRepository();
-  SharehouseResponse? sharehouse;
+  SharehouseDetailResponse? sharehouse;
   int currentIndex = 0;
   late int id;
   bool isAuthor = false;
   bool isProcess = false;
+
+  Future? mapFuture;
   Future? future;
+
+  GoogleMapController? mapController;
+  double? latitude;
+  double? longitude;
 
   @override
   void initState() {
@@ -44,8 +57,30 @@ class _SharehousePageState extends State<SharehousePage> {
     super.initState();
   }
 
+  Future<void> getLocationFromAddress() async {
+    try {
+      List<Location> locations = await locationFromAddress(sharehouse!.address);
+      if (locations.isNotEmpty) {
+        Location location = locations.first;
+        latitude = location.latitude;
+        longitude = location.longitude;
+
+        if (mapController != null) {
+          mapController!.animateCamera(
+            CameraUpdate.newLatLng(LatLng(latitude!, longitude!)),
+          );
+        }
+      } else {
+        print('주소를 찾을 수 없습니다.');
+      }
+    } catch (e) {
+      print('오류: $e');
+    }
+  }
+
   getSharehouse(int id) async {
     sharehouse = await sharehouseRepository.get(id);
+    await getLocationFromAddress();
     await brainAuthor();
   }
 
@@ -57,11 +92,13 @@ class _SharehousePageState extends State<SharehousePage> {
     if (state) {
       dynamic response = await chatRepository.create(id);
       if (response['data'] != null) {
-        ChatRoomResponse chatResponse = ChatRoomResponse.fromJson(response['data']);
-        chatReference.child("chat").child(chatResponse.chatRoomId.toString()).set({
-          'created_at': ServerValue.timestamp,
-        });
-        Get.toNamed('/chat/room');
+        ChatRoomCreateResponse chatResponse =
+            ChatRoomCreateResponse.fromJson(response['data']);
+        chatReference
+            .child("chat")
+            .child(chatResponse.chatRoomId.toString())
+            .set({});
+        Get.toNamed('/chat/room', arguments: [chatResponse.chatRoomId, chatResponse.senderId, chatResponse.receiverId]);
       } else {
         kShowToast(response['message']);
       }
@@ -88,6 +125,9 @@ class _SharehousePageState extends State<SharehousePage> {
       return false;
     } else if (status == '대기') {
       kShowToast("KYC 요청이 아직 대기중입니다. 관리자가 승인할 때까지 기다려주세요.");
+      return false;
+    } else if (status == '노멀') {
+      kShowToast("KYC 인증 이력이 없습니다. KYC를 등록해주세요.");
       return false;
     }
     return true;
@@ -132,6 +172,10 @@ class _SharehousePageState extends State<SharehousePage> {
           '쉐어하우스',
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
+        actions: [
+          Icon(Icons.bookmark_border),
+          SizedBox(width: 16.0),
+        ],
         foregroundColor: Colors.black,
         backgroundColor: Colors.white,
         elevation: 0.0,
@@ -159,8 +203,10 @@ class _SharehousePageState extends State<SharehousePage> {
                               return Container(
                                 height: 220.h,
                                 decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        image: NetworkImage(imagePath))),
+                                  image: DecorationImage(
+                                      image: NetworkImage(imagePath),
+                                      fit: BoxFit.cover),
+                                ),
                               );
                             }).toList(),
                             options: CarouselOptions(
@@ -230,27 +276,25 @@ class _SharehousePageState extends State<SharehousePage> {
                             ),
                           ),
                           SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 16.0,
-                                backgroundColor: gray06,
-                              ),
-                              SizedBox(width: 8.0),
-                              Text('백만송이 장미',
-                                  style: TextStyle(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.bold))
-                            ],
-                          ),
+                          Text(sharehouse!.name,
+                              style: TextStyle(
+                                  fontSize: 14.0, fontWeight: FontWeight.bold)),
                           SizedBox(height: 12.0),
                           Wrap(
+                            runSpacing: 8.0,
                             children: [
-                              HashTag(text: '비흡연자'),
-                              HashTag(text: '코골이 약간'),
-                              HashTag(text: '자는 시간 : 11 AM'),
-                              HashTag(text: '소극적'),
+                              HashTag(
+                                  text: ChecklistEnum.getCigarette(
+                                      sharehouse!.cigarette)),
+                              HashTag(
+                                  text:
+                                      ChecklistEnum.getType(sharehouse!.type)),
+                              HashTag(text: sharehouse!.mbti),
+                              HashTag(text: "자는 시간 : ${sharehouse!.sleepTime}"),
+                              HashTag(
+                                  text: ChecklistEnum.getHabit(
+                                      sharehouse!.habit)),
+                              HashTag(text: sharehouse!.place),
                             ],
                           ),
                         ],
@@ -281,11 +325,22 @@ class _SharehousePageState extends State<SharehousePage> {
                       ),
                     ),
                     SizedBox(height: 8.0),
-                    Container(
-                      width: double.infinity,
-                      height: 200.h,
-                      color: gray04,
-                    )
+                    if (latitude != null && longitude != null)
+                      Container(
+                        height: 300,
+                        child: GoogleMap(
+                          onMapCreated: (controller) {
+                            mapController = controller;
+                          },
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(latitude!, longitude!),
+                            zoom: 15.0,
+                          ),
+                        ),
+                      ),
+                    SizedBox(
+                      height: 100.0,
+                    ),
                   ],
                 ),
               ),

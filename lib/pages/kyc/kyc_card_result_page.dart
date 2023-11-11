@@ -152,7 +152,10 @@ class _KycCardResultPageState extends State<KycCardResultPage> {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => Get.back(),
+                      onTap: () {
+                        SessionManager.card = null;
+                        Get.back();
+                      },
                       child: GasengGeneralButton(
                         text: '다시하기',
                         color: gray10,
@@ -166,7 +169,6 @@ class _KycCardResultPageState extends State<KycCardResultPage> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () async {
-                          await SessionManager.saveCard(imageFile!.path);
                           Get.toNamed('/kyc/face/info');
                         },
                         child: GasengGeneralButton(

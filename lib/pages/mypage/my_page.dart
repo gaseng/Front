@@ -6,10 +6,32 @@ import 'package:get/get.dart';
 
 import '../../constants/constant.dart';
 
-class MyPage extends StatelessWidget {
-  LoginRepository loginRepository = LoginRepository();
+class MyPage extends StatefulWidget {
+  @override
+  State<MyPage> createState() => _MyPageState();
+}
 
-  logout () async {
+class _MyPageState extends State<MyPage> {
+  LoginRepository loginRepository = LoginRepository();
+  String nickname = "";
+  String email = "";
+
+  @override
+  void initState() {
+    getNickname();
+    super.initState();
+  }
+
+  void getNickname() async {
+    String? nick = await SessionManager.getNickname();
+    String? em = await SessionManager.getEmail();
+    setState(() {
+      nickname = nick!;
+      email = em!;
+    });
+  }
+
+  void logout() async {
     String? memId = await SessionManager.getMemId();
     if (memId != null) {
       int? code = await loginRepository.logout(int.parse(memId));
@@ -19,7 +41,7 @@ class MyPage extends StatelessWidget {
     }
   }
 
-  withdraw () {
+  withdraw() {
     Get.toNamed('/mypage/withdraw');
   }
 
@@ -27,27 +49,13 @@ class MyPage extends StatelessWidget {
     String? status = await SessionManager.getStatus();
 
     if (status == '노멀') {
-      Get.toNamed('/kyc');
+      Get.toNamed('/kyc/card/info');
     } else if (status == '대기') {
-      Fluttertoast.showToast(
-        msg: 'KYC 신청하셨습니다. 승인까지 기다려주세요.',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        webBgColor: "linear-gradient(to right, #333333, #333333)",
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-      );
+      kShowToast('KYC 신청하셨습니다. 승인까지 기다려주세요.');
+    } else if (status == '거절') {
+      kShowToast('KYC 거절된 이력이 있습니다.');
     } else {
-      Fluttertoast.showToast(
-        msg: 'KYC 거절된 이력이 있습니다.',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        webBgColor: "linear-gradient(to right, #ff3333, #ff3333)",
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-      );
+      kShowToast('이미 승인되었습니다.');
     }
   }
 
@@ -70,29 +78,20 @@ class MyPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 12.0),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 35.0,
-                  backgroundColor: gray06,
+                Text(
+                  nickname,
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(width: 12.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '닉네임',
-                      style: TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text('test@naver.com',
-                        style: TextStyle(
-                          fontSize: 14.0,
-                        )),
-                  ],
-                )
+                SizedBox(height: 4.0),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 60.0),

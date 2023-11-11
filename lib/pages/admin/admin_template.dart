@@ -13,12 +13,26 @@ class _AdminMainTemplateState extends State<AdminMainTemplate>
   late TabController tabController;
 
   int _focusedIndex = 0;
+  Widget? _currentPage;
 
   @override
   void initState() {
     tabController =
-        TabController(length: 4, vsync: this, animationDuration: Duration.zero);
+        TabController(length: 2, vsync: this, animationDuration: Duration.zero);
+    tabController.addListener(() {
+      setState(() {
+        _focusedIndex = tabController.index;
+        _currentPage = _buildPage(_focusedIndex);
+      });
+    });
+    _currentPage = _buildPage(_focusedIndex);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
   }
 
   void indexListener(int index) {
@@ -28,16 +42,19 @@ class _AdminMainTemplateState extends State<AdminMainTemplate>
     });
   }
 
+  Widget _buildPage(int index) {
+    if (index == 0) {
+      return AdminKycListPage();
+    } else if (index == 1) {
+      return AdminUserListPage();
+    }
+    throw Exception("Unhandled tab index: $index");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _focusedIndex,
-        children: [
-          AdminKycListPage(),
-          AdminUserListPage()
-        ],
-      ),
+      body: _currentPage,
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
@@ -50,6 +67,7 @@ class _AdminMainTemplateState extends State<AdminMainTemplate>
         onTap: (int index) {
           setState(() {
             _focusedIndex = index;
+            _currentPage = _buildPage(_focusedIndex);
           });
         },
         selectedFontSize: 12.0,

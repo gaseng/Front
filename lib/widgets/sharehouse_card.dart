@@ -5,12 +5,16 @@ import '../constants/constant.dart';
 
 class SharehouseCard extends StatelessWidget {
   SharehouseCard({
+    required this.name,
+    required this.date,
     required this.title,
     required this.poster,
     required this.address,
     required this.description,
   });
 
+  final name;
+  final date;
   final title;
   final poster;
   final address;
@@ -23,7 +27,7 @@ class SharehouseCard extends StatelessWidget {
       return Container(
         height: 160.h,
         decoration:
-            BoxDecoration(image: DecorationImage(image: NetworkImage(poster))),
+            BoxDecoration(image: DecorationImage(image: NetworkImage(poster), fit: BoxFit.cover)),
       );
     }
   }
@@ -32,6 +36,7 @@ class SharehouseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: cardShadow,
@@ -46,18 +51,13 @@ class SharehouseCard extends StatelessWidget {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: gray06,
-                  radius: 20.0,
-                ),
-                SizedBox(width: 12.0),
                 Text(
-                  '####',
+                  name,
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 12.0),
                 Text(
-                  '####. ##. ##',
+                  date,
                   style: TextStyle(fontSize: 12.0, color: gray08),
                 ),
               ],

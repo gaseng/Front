@@ -20,6 +20,7 @@ import 'package:get/get.dart';
 import 'package:kpostal/kpostal.dart';
 
 import '../../constants/constant.dart';
+import '../../models/sharehouse/sharehouse_detail_response.dart';
 import '../../models/sharehouse/sharehouse_response.dart';
 import '../../models/sharehouse/sharehouse_update_request.dart';
 
@@ -36,7 +37,7 @@ class _EditSharehousePageState extends State<EditSharehousePage> {
   TextEditingController addressController = TextEditingController();
   TextEditingController addressDetailController = TextEditingController();
 
-  SharehouseResponse? sharehouse;
+  SharehouseDetailResponse? sharehouse;
   late DaumPostModel _dataModel;
   Future? future;
   late int id;

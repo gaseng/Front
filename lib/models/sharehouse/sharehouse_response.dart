@@ -5,7 +5,8 @@ part 'sharehouse_response.g.dart';
 @JsonSerializable()
 class SharehouseResponse {
   final int id;
-  final int memId;
+  final String name;
+  final String createdAt;
   final String title;
   final String description;
   final String address;
@@ -15,7 +16,8 @@ class SharehouseResponse {
 
   SharehouseResponse({
     required this.id,
-    required this.memId,
+    required this.name,
+    required this.createdAt,
     required this.title,
     required this.description,
     required this.address,

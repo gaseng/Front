@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gaseng/widgets/processing.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,7 @@ import 'package:get/get.dart';
 import 'package:kpostal/kpostal.dart';
 
 import '../../constants/constant.dart';
+import '../daum_post_search_page.dart';
 
 class AddSharehousePage extends StatefulWidget {
   @override
@@ -64,7 +66,7 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
       }
 
       http.MultipartFile poster =
-      await http.MultipartFile.fromPath('poster', _poster!.path);
+          await http.MultipartFile.fromPath('poster', _poster!.path);
       SharehouseRequest request = SharehouseRequest(
           lists: lists,
           shrTitle: titleController.text,
@@ -264,10 +266,50 @@ class _AddSharehousePageState extends State<AddSharehousePage> {
                                 color: gray10,
                                 fontSize: 12.0)),
                         SizedBox(height: 8.0),
-                        GasengTextField(
-                          labelText: '주소',
-                          controller: addressController,
-                          validator: _validate,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: GasengTextField(
+                                labelText: '주소',
+                                controller: addressController,
+                                validator: _validate,
+                                enabled: false,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () async {
+                                  DataModel model =
+                                      await Get.to(() => DaumPostSearchPage());
+                                  setState(() {
+                                    addressController.text = model.address;
+                                  });
+                                },
+                                child: Container(
+                                  height: 50.0,
+                                  decoration: BoxDecoration(
+                                    color: primary,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '우편번호 검색',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 12.0),
                         Row(

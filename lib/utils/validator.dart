@@ -52,4 +52,11 @@ class Validator {
     }
     return null;
   }
+
+  static String? validate(String? value) {
+    if (value!.isEmpty) {
+      return '해당 칸을 입력하세요.';
+    }
+    return null;
+  }
 }

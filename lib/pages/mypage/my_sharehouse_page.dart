@@ -72,14 +72,19 @@ class _MySharehousePageState extends State<MySharehousePage> {
             return SingleChildScrollView(
               child: Column(
                 children: sharehouses.map((sharehouse) {
-                  return SharehouseCardSmall(
-                    id: sharehouse.shrId,
-                    title: sharehouse.shrTitle,
-                    description: sharehouse.shrDescription,
-                    address: sharehouse.shrAddress,
-                    image: sharehouse.shrPoster,
-                    goMethod: goEdit,
-                    deleteMethod: deleteSharehouse,
+                  return GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/sharehouse/detail', arguments: sharehouse.shrId);
+                    },
+                    child: SharehouseCardSmall(
+                      id: sharehouse.shrId,
+                      title: sharehouse.shrTitle,
+                      description: sharehouse.shrDescription,
+                      address: sharehouse.shrAddress,
+                      image: sharehouse.shrPoster,
+                      goMethod: goEdit,
+                      deleteMethod: deleteSharehouse,
+                    ),
                   );
                 }).toList(),
               ),

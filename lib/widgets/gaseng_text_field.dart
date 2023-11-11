@@ -32,6 +32,10 @@ class GasengTextField extends StatelessWidget {
         labelStyle: TextStyle(color: gray08),
         fillColor: enabled ? Colors.white : gray06,
         filled: true,
+        errorStyle: TextStyle(color: Colors.red),
+        errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderSide: BorderSide(color: Colors.red)),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0)),
             borderSide: BorderSide(color: gray06)),

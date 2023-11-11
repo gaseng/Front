@@ -57,6 +57,8 @@ class LoginRepository {
 
       SessionManager.saveTokens(
         loginResponse.memId,
+        loginResponse.nickname,
+        loginResponse.email,
         loginResponse.status,
         loginResponse.accessToken,
         loginResponse.refreshToken,

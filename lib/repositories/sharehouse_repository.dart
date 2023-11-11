@@ -9,20 +9,28 @@ import 'package:gaseng/models/sharehouse/sharehouse_update_request.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../auth/SessionManager.dart';
+import '../models/sharehouse/sharehouse_detail_response.dart';
 import '../models/sharehouse/sharehouse_list_response.dart';
 
 class SharehouseRepository {
   final String baseUrl = 'https://gaseng.site/sharehouse';
 
-  Future<List<SharehouseResponse>?> getAll() async {
+  Future<dynamic> getAll(int? index, List<SharehouseResponse> responses) async {
     String? accessToken = await SessionManager.getAccessToken();
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
+    String url = "";
+    if (index == null) {
+      url = "$baseUrl/all?page=10";
+    } else {
+      url = "$baseUrl/all?page=10&index=$index";
+    }
+
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/all"),
+        Uri.parse(url),
         headers: headers,
       );
 
@@ -30,19 +38,19 @@ class SharehouseRepository {
       final Map<String, dynamic> responseData = json.decode(decodeData);
       List<dynamic> sharehouses = responseData['data'];
 
-      List<SharehouseResponse> responses = [];
       for (dynamic sharehouse in sharehouses) {
         responses.add(SharehouseResponse.fromJson(sharehouse));
       }
 
-      return responses;
+      return;
 
     } catch (e) {
+      print(e);
       return null;
     }
   }
 
-  Future<SharehouseResponse?> get(int id) async {
+  Future<SharehouseDetailResponse?> get(int id) async {
     String? accessToken = await SessionManager.getAccessToken();
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -57,9 +65,10 @@ class SharehouseRepository {
 
       final decodeData = utf8.decode(response.bodyBytes);
       final Map<String, dynamic> responseData = json.decode(decodeData);
-      return SharehouseResponse.fromJson(responseData['data']);
+      return SharehouseDetailResponse.fromJson(responseData['data']);
 
     } catch (e) {
+      print(e);
       return null;
     }
   }

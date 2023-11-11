@@ -9,7 +9,8 @@ part of 'sharehouse_response.dart';
 SharehouseResponse _$SharehouseResponseFromJson(Map<String, dynamic> json) =>
     SharehouseResponse(
       id: json['id'] as int,
-      memId: json['memId'] as int,
+      name: json['name'] as String,
+      createdAt: json['createdAt'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
       address: json['address'] as String,
@@ -22,7 +23,8 @@ SharehouseResponse _$SharehouseResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SharehouseResponseToJson(SharehouseResponse instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'memId': instance.memId,
+      'name': instance.name,
+      'createdAt': instance.createdAt,
       'title': instance.title,
       'description': instance.description,
       'address': instance.address,
