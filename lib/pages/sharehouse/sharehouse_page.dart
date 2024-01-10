@@ -1,16 +1,18 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gaseng/auth/SessionManager.dart';
+import 'package:gaseng/auth/session_manager.dart';
 import 'package:gaseng/constants/constant.dart';
 import 'package:gaseng/models/chat/chat_room_create_response.dart';
 import 'package:gaseng/enum/checklist_enum.dart';
 import 'package:gaseng/models/sharehouse/sharehouse_detail_response.dart';
 import 'package:gaseng/repositories/chat_repository.dart';
+import 'package:gaseng/repositories/scrap_repository.dart';
 import 'package:gaseng/widgets/gaseng_bottom_button.dart';
 import 'package:gaseng/widgets/processing.dart';
 import 'package:geocoding/geocoding.dart';
@@ -35,6 +37,7 @@ class _SharehousePageState extends State<SharehousePage> {
               "https://gaseng-default-rtdb.asia-southeast1.firebasedatabase.app")
       .ref();
   SharehouseRepository sharehouseRepository = SharehouseRepository();
+  ScrapRepository scrapRepository = ScrapRepository();
   final ScrollController _scrollController = ScrollController();
   ChatRepository chatRepository = ChatRepository();
   SharehouseDetailResponse? sharehouse;
@@ -42,6 +45,8 @@ class _SharehousePageState extends State<SharehousePage> {
   late int id;
   bool isAuthor = false;
   bool isProcess = false;
+  bool? isScrap = false;
+  bool scrapProcessing = false;
 
   Future? mapFuture;
   Future? future;
@@ -55,6 +60,36 @@ class _SharehousePageState extends State<SharehousePage> {
     id = Get.arguments;
     future = getSharehouse(id);
     super.initState();
+  }
+
+  Widget renderScrap() {
+    if(scrapProcessing) {
+      return const Center(child: CircularProgressIndicator(),);
+    } else {
+      return isScrap!
+          ? const Icon(Icons.bookmark_outlined, color: Colors.orangeAccent,)
+          : const Icon(Icons.bookmark_border);
+    }
+  }
+
+  void scrapping() async {
+    setState(() {
+      scrapProcessing = true;
+    });
+    if (isScrap!) {
+      await scrapRepository.delete(id);
+      setState(() {
+        isScrap = false;
+      });
+    } else {
+      await scrapRepository.create(id);
+      setState(() {
+        isScrap = true;
+      });
+    }
+    setState(() {
+      scrapProcessing = false;
+    });
   }
 
   Future<void> getLocationFromAddress() async {
@@ -80,8 +115,12 @@ class _SharehousePageState extends State<SharehousePage> {
 
   getSharehouse(int id) async {
     sharehouse = await sharehouseRepository.get(id);
+    bool? state = await scrapRepository.isScrap(id);
     await getLocationFromAddress();
     await brainAuthor();
+    setState(() {
+      isScrap = state;
+    });
   }
 
   matching() async {
@@ -98,7 +137,11 @@ class _SharehousePageState extends State<SharehousePage> {
             .child("chat")
             .child(chatResponse.chatRoomId.toString())
             .set({});
-        Get.toNamed('/chat/room', arguments: [chatResponse.chatRoomId, chatResponse.senderId, chatResponse.receiverId]);
+        Get.toNamed('/chat/room', arguments: [
+          chatResponse.chatRoomId,
+          chatResponse.senderId,
+          chatResponse.receiverId
+        ]);
       } else {
         kShowToast(response['message']);
       }
@@ -173,7 +216,10 @@ class _SharehousePageState extends State<SharehousePage> {
           style: TextStyle(color: Colors.black, fontSize: 16.0),
         ),
         actions: [
-          Icon(Icons.bookmark_border),
+          GestureDetector(
+            onTap: scrapping,
+            child: renderScrap(),
+          ),
           SizedBox(width: 16.0),
         ],
         foregroundColor: Colors.black,
@@ -200,13 +246,13 @@ class _SharehousePageState extends State<SharehousePage> {
                       children: [
                         CarouselSlider(
                             items: sharehouse!.images.map((imagePath) {
-                              return Container(
-                                height: 220.h,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: NetworkImage(imagePath),
-                                      fit: BoxFit.cover),
-                                ),
+                              return CachedNetworkImage(
+                                width: double.infinity,
+                                imageUrl: imagePath,
+                                fit: BoxFit.cover,
+                                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                    Center(child: CircularProgressIndicator(value: downloadProgress.progress)),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
                               );
                             }).toList(),
                             options: CarouselOptions(

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:daum_postcode_search/daum_postcode_search.dart';
 import 'package:flutter/material.dart';
-import 'package:gaseng/auth/SessionManager.dart';
+import 'package:gaseng/auth/session_manager.dart';
 import 'package:gaseng/models/kyc/kyc_submit_request.dart';
 import 'package:gaseng/models/map/daum_post_model.dart';
 import 'package:gaseng/repositories/kyc_repository.dart';

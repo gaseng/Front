@@ -8,7 +8,7 @@ import 'package:gaseng/models/sharehouse/sharehouse_update_request.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import '../auth/SessionManager.dart';
+import '../auth/session_manager.dart';
 import '../models/sharehouse/sharehouse_detail_response.dart';
 import '../models/sharehouse/sharehouse_list_response.dart';
 

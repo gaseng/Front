@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gaseng/auth/SessionManager.dart';
+import 'package:gaseng/auth/session_manager.dart';
 import 'package:gaseng/repositories/chat_repository.dart';
 import 'package:gaseng/repositories/kyc_repository.dart';
 import 'package:gaseng/widgets/processing.dart';
@@ -127,18 +127,29 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       textController.text = "";
     });
 
-    String key = DateTime.now().millisecondsSinceEpoch.toString();
-    DatabaseReference newRef = chatReference.child(key);
+    dynamic status = await chatRepository.updateMessage(chatRoomId, message);
+    if (status != 200) {
+      String key = DateTime.now().millisecondsSinceEpoch.toString();
+      DatabaseReference newRef = chatReference.child(key);
 
-    await newRef.set({
-      'id': memId,
-      'name': nickname,
-      'message': message,
-      'timestamp': ServerValue.timestamp,
-    });
+      await newRef.set({
+        'id': memId,
+        'name': nickname,
+        'message': "메시지를 보낼 수 없습니다.",
+        'timestamp': ServerValue.timestamp,
+      });
+    } else {
+      String key = DateTime.now().millisecondsSinceEpoch.toString();
+      DatabaseReference newRef = chatReference.child(key);
 
-    // mysql last message
-    chatRepository.updateMessage(chatRoomId, message);
+      await newRef.set({
+        'id': memId,
+        'name': nickname,
+        'message': message,
+        'timestamp': ServerValue.timestamp,
+      });
+    }
+
   }
 
   void getInfo() async {

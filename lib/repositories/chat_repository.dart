@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:gaseng/models/chat/chat_room_create_response.dart';
 import 'package:http/http.dart' as http;
 
-import '../auth/SessionManager.dart';
+import '../auth/session_manager.dart';
 
 class ChatRepository {
   final String baseUrl = 'https://gaseng.site/chat';
@@ -75,6 +75,31 @@ class ChatRepository {
         Uri.parse("$baseUrl/$chatRoomId"),
         headers: headers,
         body: message
+      );
+
+      final decodeData = utf8.decode(response.bodyBytes);
+      dynamic responseJson = json.decode(decodeData);
+      print(responseJson);
+
+      return response.statusCode;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<dynamic> delete(int chatRoomId) async {
+    String? accessToken = await SessionManager.getAccessToken();
+
+    try {
+      final Map<String, String> headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken'
+      };
+
+      final response = await http.delete(
+          Uri.parse("$baseUrl/$chatRoomId"),
+          headers: headers,
       );
 
       final decodeData = utf8.decode(response.bodyBytes);

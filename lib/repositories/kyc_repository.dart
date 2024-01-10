@@ -5,7 +5,7 @@ import 'package:gaseng/models/kyc/kyc_save_request.dart';
 import 'package:gaseng/models/kyc/kyc_submit_request.dart';
 import 'package:intl/intl.dart';
 
-import '../auth/SessionManager.dart';
+import '../auth/session_manager.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/kyc/customer.dart';
@@ -183,6 +183,29 @@ class KycRepository {
 
     } catch (e) {
       print(e);
+      return null;
+    }
+  }
+
+  Future<int?> getCriminalRecord(int kycrId) async {
+    String? accessToken = await SessionManager.getAccessToken();
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $accessToken'
+    };
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/$kycrId/criminal-records"),
+        headers: headers,
+      );
+
+      final decodeData = utf8.decode(response.bodyBytes);
+      dynamic responseJson = json.decode(decodeData);
+      print(responseJson);
+
+      return responseJson['data'];
+    } catch (e) {
       return null;
     }
   }

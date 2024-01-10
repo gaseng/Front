@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gaseng/enum/kyc_enum.dart';
+import 'package:gaseng/repositories/admin_repository.dart';
 import 'package:gaseng/repositories/kyc_repository.dart';
 import 'package:gaseng/utils/formatter.dart';
 import 'package:gaseng/widgets/gaseng_general_button.dart';
@@ -40,11 +41,13 @@ class _AdminKycDetailPageState extends State<AdminKycDetailPage> {
     }
   }
 
-  void getCrime() {
+  void getCrime() async {
+    dynamic code = await kycRepository.getCriminalRecord(id);
     setState(() {
-      status++;
-      if (status == 3) {
-        status = 0;
+      if (code == 000) {
+        status = 1;
+      } else if (code == 001) {
+        status = 2;
       }
     });
   }

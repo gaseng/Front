@@ -47,6 +47,11 @@ class _ChatListPageState extends State<ChatListPage> {
     setState(() {});
   }
 
+  Future<void> delete(int id) async {
+    await chatRepository.delete(id);
+    await _refreshData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,11 +90,13 @@ class _ChatListPageState extends State<ChatListPage> {
                     });
                   },
                   child: ChatRoomTile(
+                    id: chat.chatRoomId,
                     name: chat.partnerNickname,
                     date: chat.updatedTime,
                     message: chat.message == "" || chat.message == null
                         ? "메시지가 없습니다."
                         : chat.message,
+                    delete: delete
                   ),
                 );
               }).toList()),

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../auth/SessionManager.dart';
+import '../auth/session_manager.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/sharehouse/sharehouse_list_response.dart';
@@ -39,6 +39,72 @@ class ScrapRepository {
       }
 
       return responseData;
+
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<dynamic> create(int shrId) async {
+    String? accessToken = await SessionManager.getAccessToken();
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/sharehouse/$shrId"),
+        headers: headers,
+      );
+
+      return response.statusCode;
+
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<dynamic> delete(int shrId) async {
+    String? accessToken = await SessionManager.getAccessToken();
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/sharehouse/$shrId"),
+        headers: headers,
+      );
+
+      return response.statusCode;
+
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<bool?> isScrap(int shrId) async {
+    String? accessToken = await SessionManager.getAccessToken();
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/sharehouse/$shrId"),
+        headers: headers,
+      );
+
+      final decodeData = utf8.decode(response.bodyBytes);
+      final Map<String, dynamic> responseData = json.decode(decodeData);
+
+      return responseData['data'];
 
     } catch (e) {
       print(e);

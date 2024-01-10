@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:gaseng/auth/SessionManager.dart';
+import 'package:gaseng/auth/session_manager.dart';
 import 'package:gaseng/models/login/login_response.dart';
 import 'package:http/http.dart' as http;
 

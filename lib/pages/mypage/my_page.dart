@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:gaseng/auth/SessionManager.dart';
+import 'package:gaseng/auth/session_manager.dart';
 import 'package:gaseng/repositories/login_repository.dart';
 import 'package:get/get.dart';
 

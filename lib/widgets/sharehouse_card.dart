@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -24,10 +25,14 @@ class SharehouseCard extends StatelessWidget {
     if (poster == null) {
       return const SizedBox();
     } else {
-      return Container(
-        height: 160.h,
-        decoration:
-            BoxDecoration(image: DecorationImage(image: NetworkImage(poster), fit: BoxFit.cover)),
+      return CachedNetworkImage(
+        width: double.infinity,
+        height: 200.h,
+        imageUrl: poster,
+        fit: BoxFit.cover,
+        progressIndicatorBuilder: (context, url, downloadProgress) =>
+            Center(child: CircularProgressIndicator(value: downloadProgress.progress)),
+        errorWidget: (context, url, error) => Icon(Icons.error),
       );
     }
   }

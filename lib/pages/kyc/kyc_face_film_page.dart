@@ -9,7 +9,7 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:http/http.dart' as http;
 
-import '../../auth/SessionManager.dart';
+import '../../auth/session_manager.dart';
 import '../../widgets/processing.dart';
 
 class KycFaceFilmPage extends StatefulWidget {

@@ -61,6 +61,13 @@ class _ScrapSharehousePageState extends State<ScrapSharehousePage> {
     setState(() {});
   }
 
+  Future<void> delete(int shrId) async {
+    await scrapRepository.delete(shrId).then((value) async {
+      sharehouses = [];
+      await getScraps(null);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,20 +84,29 @@ class _ScrapSharehousePageState extends State<ScrapSharehousePage> {
       body: FutureBuilder(
         future: future,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return ListView(
-              children: sharehouses.map((sharehouse) {
-            return GestureDetector(
-              onTap: () {
-                Get.toNamed('/sharehouse/detail', arguments: sharehouse.shrId);
-              },
-              child: ScrapCard(
-                title: sharehouse.shrTitle,
-                address: sharehouse.shrAddress,
-                description: sharehouse.shrDescription,
-                imagePath: sharehouse.shrPoster,
-              ),
-            );
-          }).toList());
+          if (sharehouses.isEmpty) {
+            return Center(child: Text('스크랩 게시물이 없습니다.'));
+          } else {
+            return ListView(
+                children: sharehouses.map((sharehouse) {
+                  return GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/sharehouse/detail', arguments: sharehouse.shrId)!.then((value) async {
+                        sharehouses = [];
+                        await getScraps(null);
+                      });
+                    },
+                    child: ScrapCard(
+                      id: sharehouse.shrId,
+                      title: sharehouse.shrTitle,
+                      address: sharehouse.shrAddress,
+                      description: sharehouse.shrDescription,
+                      imagePath: sharehouse.shrPoster,
+                      delete: delete,
+                    ),
+                  );
+                }).toList());
+          }
         },
       ),
     );
@@ -99,16 +115,20 @@ class _ScrapSharehousePageState extends State<ScrapSharehousePage> {
 
 class ScrapCard extends StatelessWidget {
   ScrapCard({
+    required this.id,
     required this.title,
     required this.address,
     required this.description,
     required this.imagePath,
+    required this.delete,
   });
 
+  int id;
   String title;
   String address;
   String description;
   String imagePath;
+  Function delete;
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +195,7 @@ class ScrapCard extends StatelessWidget {
                                     TextButton(
                                       child: Text('확인'),
                                       onPressed: () async {
+                                        await delete(id);
                                         Get.back();
                                       },
                                     ),

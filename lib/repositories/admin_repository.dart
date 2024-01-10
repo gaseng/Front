@@ -4,7 +4,7 @@ import 'package:gaseng/models/user/account_response.dart';
 import 'package:gaseng/models/user/member_list_summary.dart';
 import 'package:http/http.dart' as http;
 
-import '../auth/SessionManager.dart';
+import '../auth/session_manager.dart';
 
 class AdminRepository {
   final String baseUrl = 'https://gaseng.site/member';

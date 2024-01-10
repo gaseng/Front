@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'package:get/get.dart';
 import '../constants/constant.dart';
 
 class ChatRoomTile extends StatelessWidget {
-  ChatRoomTile({required this.name, required this.date, required this.message});
+  ChatRoomTile({required this.id, required this.name, required this.date, required this.message, required this.delete});
+  final id;
   final name;
   final date;
   final message;
+  final delete;
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +52,51 @@ class ChatRoomTile extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Icon(Icons.more_vert, color: gray08,)
+          PopupMenuButton(onSelected: (String choice) {
+            if (choice == '나가기') {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('정말 채팅방을 나가시겠습니까?'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('취소'),
+                          onPressed: () {
+                            Get.back();
+                          },
+                        ),
+                        TextButton(
+                          child: Text('확인'),
+                          onPressed: () async {
+                            await delete(id);
+                            Get.back();
+                          },
+                        ),
+                      ],
+                    );
+                  });
+            }
+          }, itemBuilder: (BuildContext ctx) {
+            return [
+              _menuItem(text: '나가기', color: Colors.red),
+            ];
+          }),
         ],
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _menuItem(
+      {required String text, Color color = Colors.black}) {
+    return PopupMenuItem<String>(
+      enabled: true,
+      onTap: () {},
+      value: text,
+      height: 40,
+      child: Text(
+        text,
+        style: TextStyle(color: color),
       ),
     );
   }
